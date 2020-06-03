@@ -2622,7 +2622,7 @@ static vm_fault_t wp_page_copy(struct vm_fault *vmf)
 		}
 	}
 
-	if (mem_cgroup_charge(new_page, mm, GFP_KERNEL, false))
+	if (mem_cgroup_charge(new_page, mm, GFP_KERNEL))
 		goto out_free_new;
 	cgroup_throttle_swaprate(new_page, GFP_KERNEL);
 
@@ -3103,7 +3103,7 @@ vm_fault_t do_swap_page(struct vm_fault *vmf)
 				/* Tell memcg to use swap ownership records */
 				SetPageSwapCache(page);
 				err = mem_cgroup_charge(page, vma->vm_mm,
-							GFP_KERNEL, false);
+							GFP_KERNEL);
 				ClearPageSwapCache(page);
 				if (err)
 					goto out_page;
@@ -3357,7 +3357,7 @@ skip_pmd_checks:
 	if (!page)
 		goto oom;
 
-	if (mem_cgroup_charge(page, vma->vm_mm, GFP_KERNEL, false))
+	if (mem_cgroup_charge(page, vma->vm_mm, GFP_KERNEL))
 		goto oom_free_page;
 	cgroup_throttle_swaprate(page, GFP_KERNEL);
 
@@ -3883,7 +3883,7 @@ static vm_fault_t do_cow_fault(struct vm_fault *vmf)
 	if (!vmf->cow_page)
 		return VM_FAULT_OOM;
 
-	if (mem_cgroup_charge(vmf->cow_page, vma->vm_mm, GFP_KERNEL, false)) {
+	if (mem_cgroup_charge(vmf->cow_page, vma->vm_mm, GFP_KERNEL)) {
 		put_page(vmf->cow_page);
 		return VM_FAULT_OOM;
 	}
