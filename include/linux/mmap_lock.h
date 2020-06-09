@@ -11,6 +11,11 @@ static inline void mmap_write_lock(struct mm_struct *mm)
 	mmap_write_lock(mm);
 }
 
+static inline void mmap_write_lock_nested(struct mm_struct *mm, int subclass)
+{
+	down_write_nested(&mm->mmap_sem, subclass);
+}
+
 static inline int mmap_write_lock_killable(struct mm_struct *mm)
 {
 	return mmap_write_lock_killable(mm);
