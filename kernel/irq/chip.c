@@ -505,7 +505,7 @@ static bool irq_check_poll(struct irq_desc *desc)
 
 static bool irq_may_run(struct irq_desc *desc)
 {
-	unsigned int mask = IRQD_IRQ_INPROGRESS | IRQD_WAKEUP_ARMED;
+	unsigned int mask = IRQD_IRQ_INPROGRESS | IRQD_WAKEUP_ARMED | IRQD_WAKEUP_STATE;
 
 	/*
 	 * If the interrupt is not in progress and is not an armed
@@ -531,10 +531,16 @@ static bool irq_may_run(struct irq_desc *desc)
 	/*
 	 * If the interrupt is an armed wakeup source, mark it pending
 	 * and suspended, disable it and notify the pm core about the
-	 * event.
+	 * event. If it's a wakeup interrupt and has yet to be armed
+	 * but suspend is in progress, do a wakeup to cancel suspend.
+	 * The IRQ will be allowed to run via the check right below.
 	 */
 	if (irq_pm_check_wakeup(desc))
 		return false;
+
+	/* Run the IRQ as usual if it's a wakeup source and isn't yet armed */
+	if (irqd_is_wakeup_set(&desc->irq_data))
+		return true;
 
 	/*
 	 * Handle a potential concurrent poll on a different core.
