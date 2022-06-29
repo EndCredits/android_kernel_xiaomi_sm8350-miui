@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2012-2021, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2021 XiaoMi, Inc.
  * Author: Brian Swetland <swetland@google.com>
  *
  * This software is licensed under the terms of the GNU General Public
@@ -2358,7 +2359,7 @@ static int32_t q6asm_callback(struct apr_client_data *data, void *priv)
 			}
 			if ( data->payload_size >= 2 * sizeof(uint32_t) &&
 				(lower_32_bits(port->buf[buf_index].phys) !=
-				payload[0] || 
+				payload[0] ||
 				msm_audio_populate_upper_32_bits(
 					port->buf[buf_index].phys) != payload[1])) {
 				pr_debug("%s: Expected addr %pK\n",
@@ -7398,6 +7399,22 @@ static int __q6asm_media_format_block_multi_ch_pcm_v5(struct audio_client *ac,
 		memcpy(channel_mapping, channel_map,
 			 PCM_FORMAT_MAX_NUM_CHANNEL_V8);
 	}
+	pr_debug("%s: chnl map %d, %d, %d, %d\n",  __func__,
+		channel_mapping[0], channel_mapping[1], channel_mapping[2], channel_mapping[3]);
+
+	if (fmt.param.num_channels==2) {
+		if (channel_mapping[0] == 0 || channel_mapping[1] ==0) {
+			pr_err("%s: chnl map wrong %d, %d\n", __func__,
+			channel_mapping[0], channel_mapping[1]);
+			channel_mapping[0] = 1;
+			channel_mapping[1] = 2;
+		}
+	} else if (fmt.param.num_channels==1) {
+		if (channel_mapping[0] !=3){
+			pr_err("%s: chnl map wrong %d", __func__, channel_mapping[0]);
+			channel_mapping[0] = 3;
+		}
+	}
 
 	rc = apr_send_pkt(ac->apr, (uint32_t *) &fmt);
 	if (rc < 0) {
@@ -11376,12 +11393,18 @@ static int q6asm_get_asm_topology_apptype(struct q6asm_cal_info *cal_info, struc
 	cal_info->app_type = ((struct audio_cal_info_asm_top *)
 		cal_block->cal_info)->app_type;
 
+	if (0 == cal_info->topology_id) {
+		cal_info->topology_id = 0x10c68;;
+		pr_err("%s: Correct using topology %d app_type %d\n", __func__,
+			cal_info->topology_id, cal_info->app_type);
+	}
+
 	cal_utils_mark_cal_used(cal_block);
 
 unlock:
 	mutex_unlock(&cal_data[ASM_TOPOLOGY_CAL]->lock);
 done:
-	pr_debug("%s: Using topology %d app_type %d\n", __func__,
+	pr_err("%s: Using topology %d app_type %d\n", __func__,
 			cal_info->topology_id, cal_info->app_type);
 
 	return 0;

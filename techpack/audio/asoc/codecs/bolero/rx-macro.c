@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /* Copyright (c) 2018-2021, The Linux Foundation. All rights reserved.
  * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 #include <linux/module.h>
@@ -1848,6 +1849,27 @@ static int rx_macro_config_compander(struct snd_soc_component *component,
 	/* AUX does not have compander */
 	if (interp_n == INTERP_AUX)
 		return 0;
+
+	rx_path_cfg3_reg = BOLERO_CDC_RX_RX0_RX_PATH_CFG3 +
+					(comp * RX_MACRO_RX_PATH_OFFSET);
+	rx0_path_ctl_reg = BOLERO_CDC_RX_RX0_RX_PATH_CTL +
+					(comp * RX_MACRO_RX_PATH_OFFSET);
+	pcm_rate = (snd_soc_component_read32(component, rx0_path_ctl_reg)
+						& 0x0F);
+
+	dev_err(component->dev, "%s: pcm_rate %d\n",
+		__func__, pcm_rate);
+
+	if (pcm_rate < 0x06)
+		val = 0x03;
+	else if (pcm_rate < 0x08)
+		val = 0x01;
+	else if (pcm_rate < 0x0B)
+		val = 0x02;
+	else
+		val = 0x00;
+	snd_soc_component_update_bits(component, rx_path_cfg3_reg,
+					0x03, val);
 
 	comp = interp_n;
 	dev_dbg(component->dev, "%s: event %d compander %d, enabled %d\n",

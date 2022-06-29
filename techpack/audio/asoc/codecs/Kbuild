@@ -270,6 +270,23 @@ ifeq ($(KERNEL_BUILD), 1)
 	obj-y	+= wsa883x/
 	obj-y	+= rouleur/
 endif
+
+ifneq ($(filter y, $(CONFIG_MACH_VENUS) $(CONFIG_MACH_STAR) $(CONFIG_MACH_HAYDN) $(CONFIG_MACH_ODIN)),)
+	obj-y	+= cs35l41/
+endif
+
+ifdef CONFIG_MACH_CETUS
+	obj-y	+= cs35l45/
+endif
+
+ifneq ($(filter y, $(CONFIG_MACH_RENOIR) $(CONFIG_MACH_LISA)),)
+	obj-y	+= tfa98xx/
+endif
+
+ifdef CONFIG_MACH_MONA
+	obj-y	+= aw88263s/
+endif
+
 # Module information used by KBuild framework
 obj-$(CONFIG_WCD9XXX_CODEC_CORE) += wcd_core_dlkm.o
 obj-$(CONFIG_WCD9XXX_CODEC_CORE_V2) += wcd_core_dlkm.o

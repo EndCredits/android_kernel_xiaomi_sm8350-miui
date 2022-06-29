@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /* Copyright (c) 2012-2021, The Linux Foundation. All rights reserved.
  * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 /*
  * Add support for 24 and 32bit format for ASM loopback and playback session.
@@ -668,6 +669,7 @@ enum {
 	EXT_EC_REF_SLIM_1_TX,
 	EXT_EC_REF_PRI_TDM_TX,
 	EXT_EC_REF_SEC_TDM_TX,
+	EXT_EC_REF_TERT_TDM_TX,
 	EXT_EC_REF_SENARY_MI2S_TX,
 };
 
@@ -752,6 +754,7 @@ struct msm_pcm_stream_app_type_cfg {
 	uint32_t copp_token;
 	int bit_width;
 	int copp_perf_mode;
+	int channel;
 };
 
 struct msm_pcm_channel_mixer_v2 {
