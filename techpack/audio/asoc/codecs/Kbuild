@@ -230,7 +230,6 @@ INCS +=		$(COMMON_INC) \
 
 EXTRA_CFLAGS += $(INCS)
 
-
 CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
 		-DANI_LITTLE_BIT_ENDIAN \
 		-DDOT11F_LITTLE_ENDIAN_HOST \
@@ -281,6 +280,10 @@ endif
 
 ifneq ($(filter y, $(CONFIG_MACH_XIAOMI_RENOIR) $(CONFIG_MACH_XIAOMI_LISA)),)
 	obj-y	+= tfa98xx/
+endif
+
+ifneq ($(filter y, $(CONFIG_MACH_XIAOMI_TAOYAO)),)
+	obj-y	+= tfa9874/
 endif
 
 ifneq ($(filter y, $(CONFIG_MACH_XIAOMI_MONA) $(CONFIG_MACH_XIAOMI_ZIJIN)),)

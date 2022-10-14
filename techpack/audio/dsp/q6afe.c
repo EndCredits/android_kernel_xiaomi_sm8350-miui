@@ -40,7 +40,11 @@
 #endif
 
 #ifdef CONFIG_SND_SOC_TFA9874_FOR_DAVI
+#if defined(CONFIG_TARGET_PRODUCT_TAOYAO)
+#include "../asoc/codecs/tfa9874/inc/tfa_platform_interface_definition.h"
+#else
 #include "../asoc/codecs/tfa98xx/inc/tfa_platform_interface_definition.h"
+#endif
 #endif
 
 #ifdef AUDIO_FORCE_RESTART_ADSP

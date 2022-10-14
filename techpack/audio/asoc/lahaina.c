@@ -6327,6 +6327,20 @@ static struct snd_soc_dai_link msm_common_dai_links[] = {
 		SND_SOC_DAILINK_REG(tert_mi2s_tx_hostless),
 	},
 #endif
+#if defined(CONFIG_TARGET_PRODUCT_TAOYAO)
+{/* hw:x,32 */
+  		.name = "Primary MI2S TX_Hostless",
+  		.stream_name = "Primary MI2S_TX Hostless Capture",
+  		.dynamic = 1,
+  		.dpcm_capture = 1,
+  		.trigger = {SND_SOC_DPCM_TRIGGER_POST,
+  				SND_SOC_DPCM_TRIGGER_POST},
+  		.no_host_mode = SND_SOC_DAI_LINK_NO_HOST,
+  		.ignore_suspend = 1,
+  		.ignore_pmdown_time = 1,
+  		SND_SOC_DAILINK_REG(pri_mi2s_tx_hostless),
+  	},
+#endif
 };
 
 static struct snd_soc_dai_link msm_bolero_fe_dai_links[] = {
@@ -8572,8 +8586,16 @@ static int msm_asoc_machine_probe(struct platform_device *pdev)
 		wcd_mbhc_cfg.swap_gnd_mic = msm_swap_gnd_mic;
 	}
 
+#ifdef CONFIG_TARGET_PRODUCT_TAOYAO
+	if (wcd_mbhc_cfg.enable_usbc_analog)
+	{
+		pr_err("%s: Set swap_gnd_mic = msm_usbc_swap_gnd_mic \n");
+		wcd_mbhc_cfg.swap_gnd_mic = msm_usbc_swap_gnd_mic;
+	}
+#else
 	if (wcd_mbhc_cfg.enable_usbc_analog)
 		wcd_mbhc_cfg.swap_gnd_mic = msm_usbc_swap_gnd_mic;
+#endif
 
 	pdata->fsa_handle = of_parse_phandle(pdev->dev.of_node,
 					"fsa4480-i2c-handle", 0);
