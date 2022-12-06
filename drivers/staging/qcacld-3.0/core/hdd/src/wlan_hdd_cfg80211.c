@@ -9350,6 +9350,8 @@ static const struct independent_setters independent_setters[] = {
 	{QCA_WLAN_VENDOR_ATTR_CONFIG_BT_ACTIVE,
 	 hdd_config_set_bt_active},
 #endif
+	{QCA_WLAN_VENDOR_ATTR_CONFIG_SET_NSS_ANT,
+	 hdd_config_set_nss_and_antenna_mode},
 };
 
 #ifdef WLAN_FEATURE_ELNA
