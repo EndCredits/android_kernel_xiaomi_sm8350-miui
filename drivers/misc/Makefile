@@ -68,3 +68,4 @@ obj-$(CONFIG_HISI_HIKEY_USB)	+= hisi_hikey_usb.o
 obj-$(CONFIG_ISPV2_AL6021)	+= al6021/
 obj-$(CONFIG_MMHARDWARE_OTHER_DETECTION) += mmhardware_others.o
 obj-$(CONFIG_MI_HARDWARE_ID)	+= hwid.o
+obj-$(CONFIG_PERF_HELPER)	+= perf_helper.o
