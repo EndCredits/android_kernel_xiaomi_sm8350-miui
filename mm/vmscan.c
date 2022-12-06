@@ -58,6 +58,7 @@
 #include <linux/swapops.h>
 #include <linux/balloon_compaction.h>
 
+#include <linux/cam_reclaim.h>
 #include "internal.h"
 
 #define CREATE_TRACE_POINTS
@@ -2526,6 +2527,13 @@ static void get_scan_count(struct lruvec *lruvec, struct mem_cgroup *memcg,
 	fraction[1] = fp;
 	denominator = ap + fp + 1;
 out:
+
+#ifdef CONFIG_CAM_RECLAIM
+	if (cam_reclaim(current->comm) && cam_reclaim_anonprivate() == 0) {
+		scan_balance = SCAN_ANON;
+	}
+#endif
+
 	*lru_pages = 0;
 	for_each_evictable_lru(lru) {
 		int file = is_file_lru(lru);
@@ -3102,9 +3110,19 @@ static void shrink_zones(struct zonelist *zonelist, struct scan_control *sc)
 			 * and balancing, not for a memcg's limit.
 			 */
 			nr_soft_scanned = 0;
-			nr_soft_reclaimed = mem_cgroup_soft_limit_reclaim(zone->zone_pgdat,
+#ifdef CONFIG_CAM_RECLAIM
+			if (!cam_reclaim(current->comm)) {
+				nr_soft_reclaimed = mem_cgroup_soft_limit_reclaim(zone->zone_pgdat,
 						sc->order, sc->gfp_mask,
 						&nr_soft_scanned);
+			} else {
+				nr_soft_reclaimed = 0;
+			}
+			#else
+				nr_soft_reclaimed = mem_cgroup_soft_limit_reclaim(zone->zone_pgdat,
+						sc->order, sc->gfp_mask,
+						&nr_soft_scanned);
+#endif
 			sc->nr_reclaimed += nr_soft_reclaimed;
 			sc->nr_scanned += nr_soft_scanned;
 			/* need some check for avoid more shrink_zone() */
@@ -4590,3 +4608,36 @@ void check_move_unevictable_pages(struct pagevec *pvec)
 	}
 }
 EXPORT_SYMBOL_GPL(check_move_unevictable_pages);
+
+#ifdef CONFIG_CAM_RECLAIM
+unsigned long cam_reclaim_global(unsigned long nr_to_reclaim, int reclaim_type)
+{
+        struct reclaim_state reclaim_state;
+        struct scan_control sc = {
+                .nr_to_reclaim = max(nr_to_reclaim, SWAP_CLUSTER_MAX),
+                .gfp_mask = GFP_HIGHUSER_MOVABLE,
+                .reclaim_idx = MAX_NR_ZONES - 1,
+                .order = 0,
+                .priority = DEF_PRIORITY,
+                .may_writepage = !!(reclaim_type & 4),
+                .may_unmap = !!(reclaim_type & 1),
+                .may_swap = !!(reclaim_type & 2),
+                .target_mem_cgroup = NULL,
+                .nodemask = NULL,
+        };
+        struct zonelist *zonelist = node_zonelist(numa_node_id(), sc.gfp_mask);
+        struct task_struct *p = current;
+        unsigned long nr_reclaimed;
+
+        fs_reclaim_acquire(sc.gfp_mask);
+        reclaim_state.reclaimed_slab = 0;
+        p->reclaim_state = &reclaim_state;
+
+        nr_reclaimed = do_try_to_free_pages(zonelist, &sc);
+
+        p->reclaim_state = NULL;
+        fs_reclaim_release(sc.gfp_mask);
+
+        return nr_reclaimed;
+}
+#endif
