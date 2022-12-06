@@ -70,3 +70,4 @@ obj-$(CONFIG_MMHARDWARE_OTHER_DETECTION) += mmhardware_others.o
 obj-$(CONFIG_MI_HARDWARE_ID)	+= hwid.o
 obj-$(CONFIG_PERF_HELPER)	+= perf_helper.o
 obj-$(CONFIG_GPIO_TESTING_MODE)	+= gpio-testing-mode.o
+obj-$(CONFIG_HAPTIC_NV_L)	+= haptic_nv/
