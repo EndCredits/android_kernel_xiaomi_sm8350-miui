@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-2.0-only
 
-ifneq ($(CONFIG_BOARD_XIAOMI_STAR), y)
+ifdef CONFIG_USE_COMMON_CAMERA
 # auto-detect subdirs
 ifneq ($(CONFIG_ARCH_QTI_VM), y)
 ifeq ($(CONFIG_ARCH_KONA), y)

@@ -380,6 +380,12 @@ config BOARD_XIAOMI_ZIJIN
 	help
 		Enable support for Xiaomi Civi 1S
 
+config USE_COMMON_CAMERA
+	bool "Use common camera driver"
+	depends on BOARD_XIAOMI
+	help
+	  This enables use common camera driver.
+
 endif
 
 endmenu
