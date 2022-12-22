@@ -271,19 +271,19 @@ ifeq ($(KERNEL_BUILD), 1)
 	obj-y	+= rouleur/
 endif
 
-ifneq ($(filter y, $(CONFIG_MACH_VENUS) $(CONFIG_MACH_STAR) $(CONFIG_MACH_HAYDN) $(CONFIG_MACH_ODIN)),)
+ifneq ($(filter y, $(CONFIG_MACH_XIAOMI_VENUS) $(CONFIG_MACH_XIAOMI_STAR) $(CONFIG_MACH_XIAOMI_HAYDN) $(CONFIG_MACH_XIAOMI_ODIN) $(CONFIG_MACH_XIAOMI_VILI)),)
 	obj-y	+= cs35l41/
 endif
 
-ifdef CONFIG_MACH_CETUS
+ifneq ($(filter y, $(CONFIG_MACH_XIAOMI_CETUS) $(CONFIG_MACH_XIAOMI_ARGO)),)
 	obj-y	+= cs35l45/
 endif
 
-ifneq ($(filter y, $(CONFIG_MACH_RENOIR) $(CONFIG_MACH_LISA)),)
+ifneq ($(filter y, $(CONFIG_MACH_XIAOMI_RENOIR) $(CONFIG_MACH_XIAOMI_LISA)),)
 	obj-y	+= tfa98xx/
 endif
 
-ifdef CONFIG_MACH_MONA
+ifneq ($(filter y, $(CONFIG_MACH_XIAOMI_MONA) $(CONFIG_MACH_XIAOMI_ZIJIN)),)
 	obj-y	+= aw88263s/
 endif
 

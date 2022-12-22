@@ -188,6 +188,11 @@ SND_SOC_DAILINK_DEFS(tert_mi2s_tx_hostless,
 	DAILINK_COMP_ARRAY(COMP_CODEC("snd-soc-dummy", "snd-soc-dummy-dai")),
 	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-hostless")));
 
+SND_SOC_DAILINK_DEFS(pri_mi2s_tx_hostless,
+	DAILINK_COMP_ARRAY(COMP_CPU("PRI_MI2S_TX_HOSTLESS")),
+	DAILINK_COMP_ARRAY(COMP_CODEC("snd-soc-dummy", "snd-soc-dummy-dai")),
+	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-hostless")));
+
 SND_SOC_DAILINK_DEFS(wsa_cdcdma0_capture,
 	DAILINK_COMP_ARRAY(COMP_CPU("msm-dai-cdc-dma-dev.45057")),
 	DAILINK_COMP_ARRAY(COMP_CODEC("bolero_codec", "wsa_macro_vifeedback")),
@@ -496,7 +501,7 @@ SND_SOC_DAILINK_DEFS(tert_tdm_rx_0,
 	DAILINK_COMP_ARRAY(COMP_CODEC("cs35l41.0-0040", "cs35l41.0-0040"),
 			   COMP_CODEC("cs35l41.0-0041", "cs35l41.0-0041")),
 	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-routing")));
-#elif defined(CONFIG_TARGET_PRODUCT_CS35L41_TDM)
+#elif defined(CONFIG_TARGET_PRODUCT_CS35L41_TDM) && defined(CONFIG_TARGET_PRODUCT_VILI)
 SND_SOC_DAILINK_DEFS(tert_tdm_rx_0,
 	DAILINK_COMP_ARRAY(COMP_CPU("msm-dai-q6-tdm.36896")),
 	DAILINK_COMP_ARRAY(COMP_CODEC("cs35l41.1-0040", "cs35l41.1-0040"),
@@ -527,7 +532,7 @@ SND_SOC_DAILINK_DEFS(tert_tdm_rx_1,
 	DAILINK_COMP_ARRAY(COMP_CODEC("cs35l41.0-0040", "cs35l41.0-0040"),
 			   COMP_CODEC("cs35l41.0-0041", "cs35l41.0-0041")),
 	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-routing")));
-#elif defined(CONFIG_TARGET_PRODUCT_CS35L41_TDM)
+#elif defined(CONFIG_TARGET_PRODUCT_CS35L41_TDM) && defined(CONFIG_TARGET_PRODUCT_VILI)
 SND_SOC_DAILINK_DEFS(tert_tdm_rx_1,
 	DAILINK_COMP_ARRAY(COMP_CPU("msm-dai-q6-tdm.36898")),
 	DAILINK_COMP_ARRAY(COMP_CODEC("cs35l41.1-0040", "cs35l41.1-0040"),
@@ -1037,7 +1042,7 @@ SND_SOC_DAILINK_DEFS(sec_mi2s_tx,
 	DAILINK_COMP_ARRAY(COMP_CODEC("msm-stub-codec.1", "msm-stub-tx")),
 	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-routing")));
 
-#if defined(CONFIG_SND_SOC_RENOIR)
+#if defined(CONFIG_TARGET_PRODUCT_RENOIR)
 SND_SOC_DAILINK_DEFS(tert_mi2s_rx,
        DAILINK_COMP_ARRAY(COMP_CPU("msm-dai-q6-mi2s.2")),
        DAILINK_COMP_ARRAY(COMP_CODEC("tfa98xx.1-0034", "tfa98xx-aif-1-34"),

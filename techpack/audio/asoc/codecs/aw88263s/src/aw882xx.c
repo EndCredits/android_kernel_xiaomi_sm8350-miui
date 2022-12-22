@@ -435,7 +435,7 @@ static int aw882xx_mute(struct snd_soc_dai *dai, int mute, int stream)
 			return 0;
 		}
 
-		ret =(int) aw882xx->aw_pa->cur_prof;
+		ret = aw_dev_get_profile_index(aw882xx->aw_pa);//(int) aw882xx->aw_pa->cur_prof;
 		aw_dev_err(aw882xx->dev, "aw882xx->aw_pa->cur_prof  %d ret %d ",aw882xx->aw_pa->cur_prof,ret);
 		aw_dev_err(aw882xx->dev, "aw882xx->i2c->addr %x ",aw882xx->i2c->addr);
 		if(aw882xx->i2c->addr == 0x34){
@@ -756,7 +756,7 @@ static void aw882xx_startup_work(struct work_struct *work)
 	struct aw882xx *aw882xx = container_of(work, struct aw882xx, start_work.work);
 	int ret;
 	aw_dev_err(aw882xx->dev, "enter");
-	ret = (int)aw882xx->aw_pa->cur_prof;
+	ret = aw_dev_get_profile_index(aw882xx->aw_pa);//(int)aw882xx->aw_pa->cur_prof;
 	aw_dev_err(aw882xx->dev, "aw882xx->aw_pa->cur_prof  %d ret %d ",aw882xx->aw_pa->cur_prof,ret);
 	aw_dev_err(aw882xx->dev, "aw882xx->i2c->addr %x ",aw882xx->i2c->addr);
 	if(aw882xx->i2c->addr == 0x34){
