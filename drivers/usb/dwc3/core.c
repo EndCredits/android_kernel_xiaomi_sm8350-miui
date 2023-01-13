@@ -1170,6 +1170,23 @@ int dwc3_core_init(struct dwc3 *dwc)
 		dwc3_writel(dwc->regs, DWC3_GUCTL3, reg);
 	}
 
+	/*
+	* STAR 9001346572: Host: When a Single USB 2.0 Endpoint Receives NAKs Continuously, Host
+	* Stops Transfers to Other Endpoints. When an active endpoint that is not currently cached
+	* in the host controller is chosen to be cached to the same cache index as the endpoint
+	* that receives NAK, The endpoint that receives the NAK responses would be in continuous
+	* retry mode that would prevent it from getting evicted out of the host controller cache.
+	* This would prevent the new endpoint to get into the endpoint cache and therefore service
+	* to this endpoint is not done.
+	* The workaround is to disable lower layer LSP retrying the USB2.0 NAKed transfer. Forcing
+	* this to LSP upper layer allows next EP to evict the stuck EP from cache.
+	*/
+	if ((dwc->revision == DWC3_USB31_REVISION_170A) &&
+		(dwc->version_type == DWC31_VERSIONTYPE_GA)) {
+		reg = dwc3_readl(dwc->regs, DWC3_GUCTL3);
+		reg |= DWC3_GUCTL3_USB20_RETRY_DISABLE;
+		dwc3_writel(dwc->regs, DWC3_GUCTL3, reg);
+	}
 	return 0;
 
 err3:
@@ -1675,6 +1692,7 @@ static int dwc3_probe(struct platform_device *pdev)
 	}
 
 	INIT_WORK(&dwc->bh_work, dwc3_bh_work);
+	INIT_WORK(&dwc->check_cmd_work, dwc3_check_cmd_work);
 	dwc->regs	= regs;
 	dwc->regs_size	= resource_size(&dwc_res);
 
@@ -1765,14 +1783,13 @@ static int dwc3_probe(struct platform_device *pdev)
 	dwc->dwc_ipc_log_ctxt = ipc_log_context_create(NUM_LOG_PAGES,
 					dev_name(dwc->dev), 0);
 	if (!dwc->dwc_ipc_log_ctxt)
-		dev_err(dwc->dev, "Error getting ipc_log_ctxt\n");
-
+		dev_dbg(dwc->dev, "ipc_log_ctxt is not available\n");
 	snprintf(dma_ipc_log_ctx_name, sizeof(dma_ipc_log_ctx_name),
 					"%s.ep_events", dev_name(dwc->dev));
 	dwc->dwc_dma_ipc_log_ctxt = ipc_log_context_create(2 * NUM_LOG_PAGES,
 						dma_ipc_log_ctx_name, 0);
 	if (!dwc->dwc_dma_ipc_log_ctxt)
-		dev_err(dwc->dev, "Error getting ipc_log_ctxt for ep_events\n");
+		dev_dbg(dwc->dev, "ipc_log_ctxt for ep_events is not available\n");
 
 	dwc3_instance[count] = dwc;
 	dwc->index = count;

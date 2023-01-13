@@ -400,6 +400,7 @@ int usb_function_deactivate(struct usb_function *function)
 		status = usb_gadget_deactivate(cdev->gadget);
 		spin_lock_irqsave(&cdev->lock, flags);
 	}
+
 	if (status == 0)
 		cdev->deactivations++;
 
@@ -2130,7 +2131,7 @@ void composite_disconnect(struct usb_gadget *gadget)
 
 	if (cdev == NULL) {
 		WARN(1, "%s: Calling disconnect on a Gadget that is \
-			 not connected\n", __func__);
+			not connected\n", __func__);
 		return;
 	}
 
