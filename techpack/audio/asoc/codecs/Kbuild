@@ -290,6 +290,10 @@ ifneq ($(filter y, $(CONFIG_MACH_XIAOMI_MONA) $(CONFIG_MACH_XIAOMI_ZIJIN)),)
 	obj-y	+= aw88263s/
 endif
 
+ifneq ($(filter y, $(CONFIG_MACH_XIAOMI_REDWOOD)),)
+	obj-y	+= aw88263s_m20/
+endif
+
 # Module information used by KBuild framework
 obj-$(CONFIG_WCD9XXX_CODEC_CORE) += wcd_core_dlkm.o
 obj-$(CONFIG_WCD9XXX_CODEC_CORE_V2) += wcd_core_dlkm.o

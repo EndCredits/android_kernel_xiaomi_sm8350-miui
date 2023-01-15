@@ -53,7 +53,7 @@
 static int err_count = 0;
 #endif
 
-#if defined(CONFIG_SND_SOC_AW88263S_TDM)
+#if defined(CONFIG_SND_SOC_AW88263S_TDM) || defined(CONFIG_SND_SOC_AW88263S_M20_TDM)
 #define AFE_MODULE_ID_AWDSP_TX			(0x10013D00)
 #define AFE_MODULE_ID_AWDSP_RX			(0x10013D01)
 #define AFE_PARAM_ID_AWDSP_RX_SET_ENABLE	(0x10013D11)
@@ -326,7 +326,7 @@ struct afe_ctl {
 	uint32_t cps_ch_mask;
 	struct afe_cps_hw_intf_cfg *cps_config;
 	int lsm_afe_ports[MAX_LSM_SESSIONS];
-#if defined(CONFIG_SND_SOC_AW88263S_TDM)
+#if defined(CONFIG_SND_SOC_AW88263S_TDM) || defined(CONFIG_SND_SOC_AW88263S_M20_TDM)
 	struct rtac_cal_block_data aw_cal;
 	atomic_t aw_state;
 #endif /* CONFIG_SND_SOC_AW88263S_TDM */
@@ -667,7 +667,7 @@ int afe_get_topology(int port_id)
 done:
 	return topology;
 }
-#if defined(CONFIG_SND_SOC_AW88263S_TDM)
+#if defined(CONFIG_SND_SOC_AW88263S_TDM) || defined(CONFIG_SND_SOC_AW88263S_M20_TDM)
 EXPORT_SYMBOL(afe_get_topology);
 #endif /* CONFIG_SND_SOC_AW88263S_TDM */
 
@@ -1038,6 +1038,9 @@ static int32_t afe_callback(struct apr_client_data *data, void *priv)
 		return -EINVAL;
 	}
 	if (data->opcode == RESET_EVENTS) {
+#ifdef CONFIG_SND_SOC_AW88263S_M20_TDM
+		aw_cal_unmap_memory();
+#endif /*CONFIG_SND_SOC_AW88263S_M20_TDM*/
 		pr_debug("%s: reset event = %d %d apr[%pK]\n",
 			__func__,
 			data->reset_event, data->reset_proc, this_afe.apr);
@@ -1154,6 +1157,20 @@ static int32_t afe_callback(struct apr_client_data *data, void *priv)
 				return 0;
 			}
 #endif /* CONFIG_SND_SOC_AW88263S_TDM */
+
+#if defined(CONFIG_SND_SOC_AW88263S_M20_TDM)
+		if (atomic_read(&this_afe.aw_state) == 1) {
+			if (!payload[0]) {
+				atomic_set(&this_afe.state, 0);
+			} else {
+				pr_debug("%s: status: %d", __func__, payload[0]);
+				atomic_set(&this_afe.state, -1);
+			}
+			atomic_set(&this_afe.aw_state, 0);
+			wake_up(&this_afe.wait[data->token]);
+			return 0;
+		}
+#endif /* CONFIG_SND_SOC_AW88263S_M20_TDM */
 
 		if (data->opcode == AFE_PORT_CMDRSP_GET_PARAM_V3)
 			param_id_pos = 4;
@@ -2616,7 +2633,7 @@ static int afe_spk_prot_prepare(int src_port, int dst_port, int param_id,
 		param_info.module_id = AFE_MODULE_SPEAKER_PROTECTION_V4_VI;
 		break;
 
-#if defined(CONFIG_SND_SOC_AW88263S_TDM)
+#if defined(CONFIG_SND_SOC_AW88263S_TDM) || defined(CONFIG_SND_SOC_AW88263S_M20_TDM)
 	case AFE_PARAM_ID_AWDSP_RX_SET_ENABLE:
 	case AFE_PARAM_ID_AWDSP_RX_PARAMS:
 		param_info.module_id = AFE_MODULE_ID_AWDSP_RX;
@@ -4061,7 +4078,7 @@ done:
 	return ret;
 }
 
-#if defined(CONFIG_SND_SOC_AW88263S_TDM)
+#if defined(CONFIG_SND_SOC_AW88263S_TDM) || defined(CONFIG_SND_SOC_AW88263S_M20_TDM)
 int aw_send_afe_rx_module_enable(void *buf, int size)
 {
 	union afe_spkr_prot_config config;
@@ -12174,6 +12191,9 @@ static int afe_unmap_cal_data(int32_t cal_type,
 	ret = afe_cmd_memory_unmap(
 		cal_block->map_data.q6map_handle);
 	atomic_set(&this_afe.mem_map_cal_index, -1);
+#ifdef CONFIG_SND_SOC_AW88263S_M20_TDM
+	atomic_set(&this_afe.mem_map_cal_handles[cal_index], 0);
+#endif	/*CONFIG_SND_SOC_AW88263S_M20_TDM*/
 	if (ret < 0) {
 		pr_err("%s: unmap did not work! cal_type %i ret %d\n",
 			__func__, cal_index, ret);

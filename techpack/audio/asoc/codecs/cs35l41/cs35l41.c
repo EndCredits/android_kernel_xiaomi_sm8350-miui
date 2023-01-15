@@ -1412,6 +1412,11 @@ static int cs35l41_is_speaker_in_handset(struct snd_pcm_substream *substream,
         RCV_DAI_NAME = "cs35l41.1-0040";
         HANDSET_TUNING = "rcv_voice_delta.txt";
 #endif
+#if defined(CONFIG_TARGET_PRODUCT_VENUS)
+        SPK_DAI_NAME = "cs35l41.1-0040";
+        RCV_DAI_NAME = "cs35l41.1-0042";
+        HANDSET_TUNING = "rcv_voice_delta.txt";
+#endif
         /* modify dai name and handset tuning for mars */
         if (is_dev_mars != 0) {
 		SPK_DAI_NAME = "cs35l41.1-0042";

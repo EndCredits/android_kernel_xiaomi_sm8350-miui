@@ -108,7 +108,11 @@ enum {
 	TDM_PORT_MAX,
 };
 
+#if defined(CONFIG_TARGET_PRODUCT_REDWOOD)
+#define TDM_MAX_SLOTS 4
+#else
 #define TDM_MAX_SLOTS 8
+#endif
 #define TDM_SLOT_WIDTH_BITS 32
 #define TDM_SLOT_WIDTH_BYTES TDM_SLOT_WIDTH_BITS/8
 
@@ -492,6 +496,30 @@ static struct dev_config mi2s_tx_cfg[] = {
 	[SEN_MI2S] = {SAMPLING_RATE_48KHZ, SNDRV_PCM_FORMAT_S16_LE, 1},
 };
 
+#if defined(CONFIG_TARGET_PRODUCT_REDWOOD)
+static struct tdm_dev_config pri_tdm_dev_config[MAX_PATH][TDM_PORT_MAX] = {
+	{ /* PRI TDM */
+		{ {0,   4, 0xFFFF} }, /* RX_0 */
+		{ {0xFFFF} }, /* RX_1 */
+		{ {0xFFFF} }, /* RX_2 */
+		{ {0xFFFF} }, /* RX_3 */
+		{ {0xFFFF} }, /* RX_4 */
+		{ {0xFFFF} }, /* RX_5 */
+		{ {0xFFFF} }, /* RX_6 */
+		{ {0xFFFF} }, /* RX_7 */
+	},
+	{
+		{ {0,   4, 0xFFFF} }, /* TX_0 */
+		{ {0xFFFF} }, /* TX_1 */
+		{ {0xFFFF} }, /* TX_2 */
+		{ {0xFFFF} }, /* TX_3 */
+		{ {0xFFFF} }, /* TX_4 */
+		{ {0xFFFF} }, /* TX_5 */
+		{ {0xFFFF} }, /* TX_6 */
+		{ {0xFFFF} }, /* TX_7 */
+	},
+};
+#else
 static struct tdm_dev_config pri_tdm_dev_config[MAX_PATH][TDM_PORT_MAX] = {
 	{ /* PRI TDM */
 		{ {0,   4, 0xFFFF} }, /* RX_0 */
@@ -526,6 +554,7 @@ static struct tdm_dev_config pri_tdm_dev_config[MAX_PATH][TDM_PORT_MAX] = {
 		{ {0xFFFF} }, /* TX_7 */
 	},
 };
+#endif
 
 static struct tdm_dev_config sec_tdm_dev_config[MAX_PATH][TDM_PORT_MAX] = {
 	{ /* SEC TDM */
@@ -550,6 +579,30 @@ static struct tdm_dev_config sec_tdm_dev_config[MAX_PATH][TDM_PORT_MAX] = {
 	},
 };
 
+#if defined(CONFIG_TARGET_PRODUCT_REDWOOD)
+static struct tdm_dev_config tert_tdm_dev_config[MAX_PATH][TDM_PORT_MAX] = {
+	{ /* TERT TDM */
+		{ {0,   4, 0xFFFF} }, /* RX_0 */
+		{ {16, 20, 0xFFFF} }, /* RX_1 */
+		{ {16, 20, 0xFFFF} }, /* RX_2 */
+		{ {24, 28, 0xFFFF} }, /* RX_3 */
+		{ {0xFFFF} }, /* RX_4 */
+		{ {0xFFFF} }, /* RX_5 */
+		{ {0xFFFF} }, /* RX_6 */
+		{ {0xFFFF} }, /* RX_7 */
+	},
+	{
+		{ {0,   4, 0xFFFF} }, /* TX_0 */
+		{ {8,  12, 0xFFFF} }, /* TX_1 */
+		{ {16, 20, 0xFFFF} }, /* TX_2 */
+		{ {24, 28, 0xFFFF} }, /* TX_3 */
+		{ {0xFFFF} }, /* TX_4 */
+		{ {0xFFFF} }, /* TX_5 */
+		{ {0xFFFF} }, /* TX_6 */
+		{ {0xFFFF} }, /* TX_7 */
+	},
+};
+#else
 static struct tdm_dev_config tert_tdm_dev_config[MAX_PATH][TDM_PORT_MAX] = {
 	{ /* TERT TDM */
 		{ {0,   4,   8,   12, 0xFFFF} }, /* RX_0 */
@@ -572,6 +625,7 @@ static struct tdm_dev_config tert_tdm_dev_config[MAX_PATH][TDM_PORT_MAX] = {
 		{ {0xFFFF} }, /* TX_7 */
 	},
 };
+#endif
 
 static struct tdm_dev_config quat_tdm_dev_config[MAX_PATH][TDM_PORT_MAX] = {
 	{ /* QUAT TDM */
@@ -3978,9 +4032,11 @@ static const struct snd_kcontrol_new msm_common_snd_controls[] = {
 	SOC_ENUM_EXT("TERT_TDM_RX_0 SampleRate", tdm_rx_sample_rate,
 			tdm_rx_sample_rate_get,
 			tdm_rx_sample_rate_put),
+#if !defined(CONFIG_TARGET_PRODUCT_REDWOOD)
 	SOC_ENUM_EXT("TERT_TDM_RX_1 SampleRate", tdm_rx_sample_rate,
 			tdm_rx_sample_rate_get,
 			tdm_rx_sample_rate_put),
+#endif
 	SOC_ENUM_EXT("QUAT_TDM_RX_0 SampleRate", tdm_rx_sample_rate,
 			tdm_rx_sample_rate_get,
 			tdm_rx_sample_rate_put),
@@ -4087,9 +4143,11 @@ static const struct snd_kcontrol_new msm_common_snd_controls[] = {
 	SOC_ENUM_EXT("PRI_TDM_RX_0 Format", tdm_rx_format,
 			tdm_rx_format_get,
 			tdm_rx_format_put),
+#if !defined(CONFIG_TARGET_PRODUCT_REDWOOD)
 	SOC_ENUM_EXT("PRI_TDM_RX_1 Format", tdm_rx_format,
 			tdm_rx_format_get,
 			tdm_rx_format_put),
+#endif
 	SOC_ENUM_EXT("SEC_TDM_RX_0 Format", tdm_rx_format,
 			tdm_rx_format_get,
 			tdm_rx_format_put),
@@ -4183,9 +4241,11 @@ static const struct snd_kcontrol_new msm_common_snd_controls[] = {
 	SOC_ENUM_EXT("PRI_TDM_RX_0 Channels", tdm_rx_chs,
 			tdm_rx_ch_get,
 			tdm_rx_ch_put),
+#if !defined(CONFIG_TARGET_PRODUCT_REDWOOD)
 	SOC_ENUM_EXT("PRI_TDM_RX_1 Channels", tdm_rx_chs,
 			tdm_rx_ch_get,
 			tdm_rx_ch_put),
+#endif
 	SOC_ENUM_EXT("SEC_TDM_RX_0 Channels", tdm_rx_chs,
 			tdm_rx_ch_get,
 			tdm_rx_ch_put),
@@ -4426,6 +4486,7 @@ static int msm_be_hw_params_fixup(struct snd_soc_pcm_runtime *rtd,
 		rate->min = rate->max = tdm_rx_cfg[TDM_PRI][TDM_0].sample_rate;
 		break;
 
+#if !defined(CONFIG_TARGET_PRODUCT_REDWOOD)
 	case MSM_BACKEND_DAI_PRI_TDM_RX_1:
 		channels->min = channels->max =
 				tdm_rx_cfg[TDM_PRI][TDM_1].channels;
@@ -4433,6 +4494,7 @@ static int msm_be_hw_params_fixup(struct snd_soc_pcm_runtime *rtd,
 			       tdm_rx_cfg[TDM_PRI][TDM_1].bit_format);
 		rate->min = rate->max = tdm_rx_cfg[TDM_PRI][TDM_1].sample_rate;
 		break;
+#endif
 
 	case MSM_BACKEND_DAI_PRI_TDM_TX_0:
 		channels->min = channels->max =
@@ -4886,7 +4948,7 @@ static int lahaina_tdm_snd_hw_params(struct snd_pcm_substream *substream,
 			__func__, cpu_dai->id);
 		return -EINVAL;
 	}
-#if defined(CONFIG_TARGET_PRODUCT_LISA) || defined(CONFIG_TARGET_PRODUCT_MONA) || defined(CONFIG_TARGET_PRODUCT_ZIJIN)
+#if defined(CONFIG_TARGET_PRODUCT_LISA) || defined(CONFIG_TARGET_PRODUCT_MONA) || defined(CONFIG_TARGET_PRODUCT_ZIJIN) || defined(CONFIG_TARGET_PRODUCT_REDWOOD)
 	if (slots == TDM_MAX_SLOTS) {
 		slots = TDM_MAX_SLOTS / 2;
 		pr_debug("%s: dai id = 0x%x update slots = %d\n", __func__, cpu_dai->id, slots);
@@ -4997,7 +5059,9 @@ static int msm_get_tdm_mode(u32 port_id)
 
 	switch (port_id) {
 	case AFE_PORT_ID_PRIMARY_TDM_RX:
+#if !defined(CONFIG_TARGET_PRODUCT_REDWOOD)
 	case AFE_PORT_ID_PRIMARY_TDM_RX_1:
+#endif
 	case AFE_PORT_ID_PRIMARY_TDM_TX:
 		tdm_mode = TDM_PRI;
 		break;
@@ -6300,7 +6364,7 @@ static struct snd_soc_dai_link msm_common_dai_links[] = {
 		.ignore_suspend = 1,
 		SND_SOC_DAILINK_REG(tx3_cdcdma_hostless),
 	},
-#if defined(CONFIG_TARGET_PRODUCT_LISA) || defined(CONFIG_TARGET_PRODUCT_MONA) || defined(CONFIG_TARGET_PRODUCT_ZIJIN)
+#if defined(CONFIG_TARGET_PRODUCT_LISA) || defined(CONFIG_TARGET_PRODUCT_MONA) || defined(CONFIG_TARGET_PRODUCT_ZIJIN) || defined(CONFIG_TARGET_PRODUCT_REDWOOD)
 	{/* hw:x,32 */
 		.name = "PRI_TDM_TX_0_HOSTLESS",
 		.stream_name = "PRI_TDM_TX_0_HOSTLESS Capture",
@@ -6679,7 +6743,7 @@ static struct snd_soc_dai_link msm_common_be_dai_links[] = {
 		.ignore_pmdown_time = 1,
 		SND_SOC_DAILINK_REG(pri_tdm_rx_0),
 	},
-#if defined(CONFIG_TARGET_PRODUCT_LISA) || defined(CONFIG_TARGET_PRODUCT_MONA) || defined(CONFIG_TARGET_PRODUCT_ZIJIN)
+#if defined(CONFIG_TARGET_PRODUCT_LISA) || defined(CONFIG_TARGET_PRODUCT_MONA) || defined(CONFIG_TARGET_PRODUCT_ZIJIN) || defined(CONFIG_TARGET_PRODUCT_REDWOOD)
 	{
 		.name = LPASS_BE_PRI_TDM_RX_1,
 		.stream_name = "Primary TDM1 Playback",
