@@ -548,6 +548,12 @@ config GPIO_TESTING_MODE
 	help
 	  Enable driver for a simple testing mode detection.
 
+config BOOTUP_RECLAIM
+        bool "bootup reclaim"
+        default n
+        help
+          reclaim global memory when bootup
+
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 source "drivers/misc/cb710/Kconfig"
