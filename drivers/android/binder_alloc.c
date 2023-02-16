@@ -25,6 +25,12 @@
 #include <linux/sizes.h>
 #include "binder_alloc.h"
 #include "binder_trace.h"
+#ifdef CONFIG_OEM_KERNEL
+#include "binder_oem.h"
+
+extern struct task_struct *binder_buff_owner(struct binder_alloc *alloc);
+extern struct oem_binder_hook oem_binder_hook_set;
+#endif
 
 struct list_lru binder_alloc_lru;
 
@@ -425,6 +431,20 @@ static struct binder_buffer *binder_alloc_new_buf_locked(
 
 	/* Pad 0-size buffers so they get assigned unique addresses */
 	size = max(size, sizeof(void *));
+
+#ifdef CONFIG_OEM_KERNEL
+	if (oem_binder_hook_set.oem_buf_overflow_hook && is_async
+		&& ((alloc->free_async_space < oem_binder_hook_set.oem_wahead_thresh
+		* (size + sizeof(struct binder_buffer)))
+		|| (alloc->free_async_space < oem_binder_hook_set.oem_wahead_space))) {
+			struct task_struct *owner;
+			owner = binder_buff_owner(alloc);
+
+			if (owner)
+				oem_binder_hook_set.oem_buf_overflow_hook(owner, current,
+						current->pid, false, 0);
+	}
+#endif
 
 	if (is_async && alloc->free_async_space < size) {
 		binder_alloc_debug(BINDER_DEBUG_BUFFER_ALLOC,
