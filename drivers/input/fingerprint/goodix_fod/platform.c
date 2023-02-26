@@ -23,6 +23,38 @@
 #include <linux/platform_device.h>
 #endif
 
+#define GOODIX_FINGERPRINT_PINCTRL_DEFAULT_STATE "fingerprint_goodix_default"
+
+static int gf_pinctrl_init(struct gf_dev *gf_dev)
+{
+	int ret = 0;
+
+	gf_dev->pinctrl = devm_pinctrl_get(&gf_dev->spi->dev);
+	if (IS_ERR_OR_NULL(gf_dev->pinctrl)) {
+		pr_info("Failed to get pinctrl, please check dts\n");
+		ret = PTR_ERR(gf_dev->pinctrl);
+		goto err_pinctrl_get;
+	}
+
+	gf_dev->gf_default_state = pinctrl_lookup_state(gf_dev->pinctrl, GOODIX_FINGERPRINT_PINCTRL_DEFAULT_STATE);
+	if (IS_ERR_OR_NULL(gf_dev->gf_default_state)) {
+		pr_info("Pin state[default] not found\n");
+		ret = PTR_ERR(gf_dev->gf_default_state);
+		goto err_pinctrl_lookup;
+	}
+
+	pr_info("gf_pinctrl_init done\n");
+	return 0;
+err_pinctrl_lookup:
+	if (gf_dev->pinctrl) {
+		devm_pinctrl_put(gf_dev->pinctrl);
+	}
+err_pinctrl_get:
+	gf_dev->pinctrl = NULL;
+	gf_dev->gf_default_state = NULL;
+	return ret;
+}
+
 int gf_parse_dts(struct gf_dev *gf_dev)
 {
 #ifdef GF_PW_CTL
@@ -54,6 +86,8 @@ int gf_parse_dts(struct gf_dev *gf_dev)
 		pr_info("IRQ GPIO is invalid.\n");
 		return -EPERM;
 	}
+
+	gf_pinctrl_init(gf_dev);
 
 	return 0;
 }
