@@ -148,7 +148,6 @@ static bool damon_pa_young(unsigned long paddr, unsigned long *page_sz)
 			result.accessed = false;
 		else
 			result.accessed = true;
-		put_page(page);
 		goto out;
 	}
 
@@ -162,10 +161,10 @@ static bool damon_pa_young(unsigned long paddr, unsigned long *page_sz)
 
 	if (need_lock)
 		unlock_page(page);
-	put_page(page);
 
 out:
 	*page_sz = result.page_sz;
+	put_page(page);
 	return result.accessed;
 }
 
