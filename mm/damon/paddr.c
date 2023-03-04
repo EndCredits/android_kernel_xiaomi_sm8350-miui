@@ -247,8 +247,8 @@ static inline unsigned long damon_pa_mark_accessed_or_deactivate(
 			mark_page_accessed(page);
 		else
 			deactivate_page(page);
-		put_page(page);
 		applied++;
+		put_page(page);
 	}
 	return applied * PAGE_SIZE;
 }
