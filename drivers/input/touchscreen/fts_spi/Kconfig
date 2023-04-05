@@ -8,3 +8,6 @@ config TOUCHSCREEN_ST_FTS_V521_SPI
 
 	  To compile this driver as a module, choose M here: the
 
+config QGKI_SYSTEM
+	bool "QGKI config"
+	default y
