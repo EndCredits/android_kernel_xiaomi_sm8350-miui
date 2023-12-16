@@ -3,12 +3,10 @@
  * cs35l45-i2c.c -- CS35L45 I2C driver
  *
  * Copyright 2019 Cirrus Logic, Inc.
- * Copyright (C) 2021 XiaoMi, Inc.
  *
  * Author: James Schulman <james.schulman@cirrus.com>
  *
  */
-#define DEBUG
 #include <linux/module.h>
 #include <linux/i2c.h>
 #include <linux/regulator/consumer.h>

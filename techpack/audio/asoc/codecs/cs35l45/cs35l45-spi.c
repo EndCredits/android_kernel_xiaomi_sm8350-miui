@@ -3,7 +3,6 @@
  * cs35l45-spi.c -- CS35L45 SPI driver
  *
  * Copyright 2019 Cirrus Logic, Inc.
- * Copyright (C) 2021 XiaoMi, Inc.
  *
  * Author: James Schulman <james.schulman@cirrus.com>
  *

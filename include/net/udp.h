@@ -27,7 +27,7 @@
 #include <linux/ipv6.h>
 #include <linux/seq_file.h>
 #include <linux/poll.h>
-#ifdef CONFIG_MACH_XIAOMI
+#ifdef CONFIG_BOARD_XIAOMI
 #include <linux/udp.h>
 #include <linux/bpf-cgroup.h>
 #endif
@@ -510,7 +510,7 @@ static inline struct sk_buff *udp_rcv_segment(struct sock *sk,
 	return segs;
 }
 
-#ifdef CONFIG_MACH_XIAOMI
+#ifdef CONFIG_BOARD_XIAOMI
 #ifdef CONFIG_BPF
 static inline int udp_call_bpf(struct sock *sk, int op, u32 nargs, u32 *args)
 {

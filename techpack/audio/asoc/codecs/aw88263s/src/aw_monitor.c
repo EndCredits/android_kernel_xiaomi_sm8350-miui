@@ -4,7 +4,6 @@
  * Version: v0.1.17
  *
  * Copyright (c) 2019 AWINIC Technology CO., LTD
- * Copyright (C) 2021 XiaoMi, Inc.
  *
  *  Author: Nick Li <liweilei@awinic.com.cn>
  *

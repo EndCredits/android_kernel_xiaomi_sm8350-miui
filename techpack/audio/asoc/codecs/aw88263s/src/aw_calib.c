@@ -3,7 +3,6 @@
  *
  *
  * Copyright (c) 2020 AWINIC Technology CO., LTD
- * Copyright (C) 2021 XiaoMi, Inc.
  *
  *  Author: Nick Li <liweilei@awinic.com.cn>
  *
@@ -12,7 +11,6 @@
  * Free Software Foundation;  either version 2 of the  License, or (at your
  * option) any later version.
  */
-/*#define DEBUG*/
 #include <linux/module.h>
 #include <asm/ioctls.h>
 #include <asm/uaccess.h>

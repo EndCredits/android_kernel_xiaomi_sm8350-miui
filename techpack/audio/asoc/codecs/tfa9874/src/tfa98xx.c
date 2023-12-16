@@ -2582,7 +2582,7 @@ static int tfa98xx_load_container(struct tfa98xx *tfa98xx)
 	tfa98xx_container_loaded(firmware, tfa98xx);
 	release_firmware(firmware);
 	mutex_unlock(&tfa98xx_mutex);
-
+  
 	return rc;
 }
 

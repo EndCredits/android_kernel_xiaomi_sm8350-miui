@@ -1854,7 +1854,7 @@ static struct ctl_table vm_table[] = {
 		.mode		= 0200,
 		.proc_handler	= sysctl_compaction_handler,
 	},
-#ifdef CONFIG_MACH_XIAOMI
+#ifdef CONFIG_BOARD_XIAOMI
 	{
 		.procname	= "reclaim_pages",
 		.data		= &sysctl_reclaim_pages,

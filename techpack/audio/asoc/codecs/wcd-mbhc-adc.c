@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /* Copyright (c) 2017-2021, The Linux Foundation. All rights reserved.
- * Copyright (C) 2021 XiaoMi, Inc.
  */
 #include <linux/module.h>
 #include <linux/init.h>
@@ -147,23 +146,27 @@ static int wcd_measure_adc_once(struct wcd_mbhc *mbhc, int mux_ctl)
 	 * enable and disable it after FSM enable
 	 */
 	if (mbhc->mbhc_cb->mbhc_comp_autozero_control)
-		mbhc->mbhc_cb->mbhc_comp_autozero_control(mbhc, true);
+		mbhc->mbhc_cb->mbhc_comp_autozero_control(mbhc,
+							true);
 	WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_FSM_EN, 1);
 	if (mbhc->mbhc_cb->mbhc_comp_autozero_control)
-		mbhc->mbhc_cb->mbhc_comp_autozero_control(mbhc,	false);
+		mbhc->mbhc_cb->mbhc_comp_autozero_control(mbhc,
+							false);
 	WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_ADC_EN, 1);
 
 	while (retry--) {
 		/* wait for 600usec to get adc results */
 		usleep_range(600, 610);
-
+		pr_debug("%s: retry: %d\n",  __func__, retry);
 		/* check for ADC Timeout */
 		WCD_MBHC_REG_READ(WCD_MBHC_ADC_TIMEOUT, adc_timeout);
+		pr_debug("%s: timeout: %d\n",  __func__, adc_timeout);
 		if (adc_timeout)
 			continue;
 
 		/* Read ADC complete bit */
 		WCD_MBHC_REG_READ(WCD_MBHC_ADC_COMPLETE, adc_complete);
+		pr_debug("%s: complete: %d\n",  __func__, adc_complete);
 		if (!adc_complete)
 			continue;
 
@@ -376,10 +379,12 @@ done:
 	 * enable and disable it after FSM enable
 	 */
 	if (mbhc->mbhc_cb->mbhc_comp_autozero_control)
-		mbhc->mbhc_cb->mbhc_comp_autozero_control(mbhc, true);
+		mbhc->mbhc_cb->mbhc_comp_autozero_control(mbhc,
+							true);
 	WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_FSM_EN, 1);
 	if (mbhc->mbhc_cb->mbhc_comp_autozero_control)
-		mbhc->mbhc_cb->mbhc_comp_autozero_control(mbhc, false);
+		mbhc->mbhc_cb->mbhc_comp_autozero_control(mbhc,
+							false);
 	/* Restore ADC Enable */
 	WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_ADC_EN, adc_en);
 
@@ -922,6 +927,11 @@ correct_plug_type:
 			wrk_complete = false;
 		}
 	}
+	if ((plug_type == MBHC_PLUG_TYPE_HEADSET ||
+	    plug_type == MBHC_PLUG_TYPE_HEADPHONE))
+		if (mbhc->mbhc_cb->bcs_enable)
+			mbhc->mbhc_cb->bcs_enable(mbhc, true);
+
 	if (!wrk_complete) {
 		/*
 		 * If plug_tye is headset, we might have already reported either
@@ -983,11 +993,6 @@ enable_supply:
 		WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_DETECTION_DONE, 1);
 	else
 		WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_DETECTION_DONE, 0);
-
-	if ((plug_type == MBHC_PLUG_TYPE_HEADSET ||
-	    plug_type == MBHC_PLUG_TYPE_HEADPHONE))
-		if (mbhc->mbhc_cb->bcs_enable)
-			mbhc->mbhc_cb->bcs_enable(mbhc, true);
 
 	if (plug_type == MBHC_PLUG_TYPE_HEADSET)
 		mbhc->micbias_enable = true;

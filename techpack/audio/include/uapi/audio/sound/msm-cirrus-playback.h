@@ -1,5 +1,4 @@
 /* Copyright (c) 2016 Cirrus Logic, Inc.
- * Copyright (C) 2021 XiaoMi, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -110,10 +109,10 @@
 	compat_uptr_t)
 
 struct crus_sp_ioctl_header {
-	__u32 size;
-	__u32 module_id;
-	__u32 param_id;
-	__u32 data_length;
+	uint32_t size;
+	uint32_t module_id;
+	uint32_t param_id;
+	uint32_t data_length;
 	void *data;
 };
 

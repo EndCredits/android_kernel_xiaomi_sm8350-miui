@@ -11,7 +11,6 @@
  * Free Software Foundation;  either version 2 of the  License, or (at your
  * option) any later version.
  */
-/*#define DEBUG*/
 #include <linux/module.h>
 #include <asm/ioctls.h>
 #include <asm/uaccess.h>

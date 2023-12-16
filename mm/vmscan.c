@@ -4142,7 +4142,7 @@ void wakeup_kswapd(struct zone *zone, gfp_t gfp_flags, int order,
 	wake_up_interruptible(&pgdat->kswapd_wait);
 }
 
-#if defined(CONFIG_COMPACTION) && defined(CONFIG_MACH_XIAOMI)
+#if defined(CONFIG_COMPACTION) && defined(CONFIG_BOARD_XIAOMI)
 static long reclaim_setcpuaffinity(struct task_struct *task, struct cpumask *newmask,
 			struct cpumask *prevmask)
 {

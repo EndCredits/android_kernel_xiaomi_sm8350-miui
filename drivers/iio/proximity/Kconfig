@@ -125,7 +125,7 @@ config VL53L0X_I2C
 
 config MIUS_PROXIMITY
 	tristate "xiaomi ultrasound proximity sensor"
-	depends on MACH_XIAOMI
+	depends on BOARD_XIAOMI
 	select IIO_BUFFER
 	select IIO_TRIGGERED_BUFFER
 	select IIO_BUFFER_CB

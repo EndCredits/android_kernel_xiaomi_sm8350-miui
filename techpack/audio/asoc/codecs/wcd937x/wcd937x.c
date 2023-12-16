@@ -196,12 +196,10 @@ static int wcd937x_init_reg(struct snd_soc_component *component)
 	snd_soc_component_update_bits(component, WCD937X_MICB3_TEST_CTL_2,
 				      0x38, 0x00);
 	/* Set Bandgap Fine Adjustment to +5mV for Tanggu SMIC part */
-	dev_err(component->dev, "%s enter\n",__func__);
 	if (snd_soc_component_read32(component, WCD937X_DIGITAL_EFUSE_REG_16)
 	    == 0x01) {
 		snd_soc_component_update_bits(component,
 				WCD937X_BIAS_VBG_FINE_ADJ, 0xF0, 0xB0);
-		dev_err(component->dev, "%s wcd937x is smic\n",__func__);
 	} else if (snd_soc_component_read32(component,
 		WCD937X_DIGITAL_EFUSE_REG_16) == 0x02) {
 		snd_soc_component_update_bits(component,
@@ -212,7 +210,6 @@ static int wcd937x_init_reg(struct snd_soc_component *component)
 				WCD937X_BIAS_VBG_FINE_ADJ, 0xF0, 0xB0);
 		snd_soc_component_update_bits(component,
 				WCD937X_HPH_NEW_INT_RDAC_GAIN_CTL , 0xF0, 0x50);
-		dev_err(component->dev, "%s wcd937x is not smic\n",__func__);
 	}
 	return 0;
 }
@@ -1443,9 +1440,6 @@ static int wcd937x_codec_enable_adc(struct snd_soc_dapm_widget *w,
 	case SND_SOC_DAPM_PRE_PMU:
 		mutex_lock(&wcd937x->ana_tx_clk_lock);
 		wcd937x->ana_clk_count++;
-#ifdef CONFIG_SND_SOC_FOR_ULTRASOUND_PATH
-		wcd937x->ana_adc_count++;
-#endif
 		mutex_unlock(&wcd937x->ana_tx_clk_lock);
 		snd_soc_component_update_bits(component,
 				WCD937X_DIGITAL_CDC_DIG_CLK_CTL, 0x80, 0x80);
@@ -1458,25 +1452,6 @@ static int wcd937x_codec_enable_adc(struct snd_soc_dapm_widget *w,
 		    true);
 		break;
 	case SND_SOC_DAPM_POST_PMD:
-#ifdef CONFIG_SND_SOC_FOR_ULTRASOUND_PATH
-		mutex_lock(&wcd937x->ana_tx_clk_lock);
-		wcd937x->ana_adc_count--;
-		mutex_unlock(&wcd937x->ana_tx_clk_lock);
-		dev_dbg(component->dev, "%s SND_SOC_DAPM_POST_PMD, ana_adc_count=%d\n", __func__, wcd937x->ana_adc_count);
-		wcd937x_tx_connect_port(component, ADC1 + (w->shift), false);
-		if (w->shift == 1 &&
-			test_bit(AMIC2_BCS_ENABLE, &wcd937x->status_mask)) {
-			wcd937x_tx_connect_port(component, MBHC, false);
-			clear_bit(AMIC2_BCS_ENABLE, &wcd937x->status_mask);
-		}
-		if (wcd937x->ana_adc_count <= 0) {
-			wcd937x->ana_adc_count = 0;
-            dev_dbg(component->dev, "%s SND_SOC_DAPM_POST_PMD, ana_adc_count=%d, POWER DOWN\n", __func__, wcd937x->ana_adc_count);
-			snd_soc_component_update_bits(component,
-					WCD937X_DIGITAL_CDC_ANA_CLK_CTL, 0x08, 0x00);
-		}
-
-#else
 		wcd937x_tx_connect_port(component, ADC1 + (w->shift), false);
 		if (w->shift == 1 &&
 			test_bit(AMIC2_BCS_ENABLE, &wcd937x->status_mask)) {
@@ -1485,7 +1460,6 @@ static int wcd937x_codec_enable_adc(struct snd_soc_dapm_widget *w,
 		}
 		snd_soc_component_update_bits(component,
 				WCD937X_DIGITAL_CDC_ANA_CLK_CTL, 0x08, 0x00);
-#endif
 		break;
 	};
 
@@ -1505,11 +1479,6 @@ static int wcd937x_enable_req(struct snd_soc_dapm_widget *w,
 
 	switch (event) {
 	case SND_SOC_DAPM_PRE_PMU:
-#ifdef CONFIG_SND_SOC_FOR_ULTRASOUND_PATH
-		mutex_lock(&wcd937x->ana_tx_clk_lock);
-		wcd937x->ana_tx_req_count++;
-		mutex_unlock(&wcd937x->ana_tx_clk_lock);
-#endif
 		snd_soc_component_update_bits(component,
 				WCD937X_DIGITAL_CDC_REQ_CTL, 0x02, 0x02);
 		snd_soc_component_update_bits(component,
@@ -1530,24 +1499,6 @@ static int wcd937x_enable_req(struct snd_soc_dapm_widget *w,
 				WCD937X_ANA_TX_CH3, 0x80, 0x80);
 		break;
 	case SND_SOC_DAPM_POST_PMD:
-#ifdef CONFIG_SND_SOC_FOR_ULTRASOUND_PATH
-		mutex_lock(&wcd937x->ana_tx_clk_lock);
-		wcd937x->ana_tx_req_count--;
-		mutex_unlock(&wcd937x->ana_tx_clk_lock);
-		dev_dbg(component->dev, "%s SND_SOC_DAPM_POST_PMD, ana_tx_req_count=%d\n", __func__, wcd937x->ana_tx_req_count);
-		if (wcd937x->ana_tx_req_count <= 0) {
-			dev_dbg(component->dev, "%s SND_SOC_DAPM_POST_PMD, ana_tx_req_count=%d, POWER DOWN\n", __func__, wcd937x->ana_tx_req_count);
-			wcd937x->ana_tx_req_count = 0;
-			snd_soc_component_update_bits(component,
-					WCD937X_ANA_TX_CH1, 0x80, 0x00);
-			snd_soc_component_update_bits(component,
-					WCD937X_ANA_TX_CH2, 0x80, 0x00);
-			snd_soc_component_update_bits(component,
-					WCD937X_ANA_TX_CH3, 0x80, 0x00);
-			snd_soc_component_update_bits(component,
-					WCD937X_DIGITAL_CDC_DIG_CLK_CTL, 0x10, 0x00);
-		}
-#else
 		snd_soc_component_update_bits(component,
 				WCD937X_ANA_TX_CH1, 0x80, 0x00);
 		snd_soc_component_update_bits(component,
@@ -1556,8 +1507,6 @@ static int wcd937x_enable_req(struct snd_soc_dapm_widget *w,
 				WCD937X_ANA_TX_CH3, 0x80, 0x00);
 		snd_soc_component_update_bits(component,
 				WCD937X_DIGITAL_CDC_DIG_CLK_CTL, 0x10, 0x00);
-#endif
-
 		mutex_lock(&wcd937x->ana_tx_clk_lock);
 		wcd937x->ana_clk_count--;
 		if (wcd937x->ana_clk_count <= 0) {
@@ -1693,33 +1642,6 @@ int wcd937x_micbias_control(struct snd_soc_component *component,
 				&wcd937x->mbhc->notifier, post_dapm_off,
 				&wcd937x->mbhc->wcd_mbhc);
 		break;
-	case MICB2_DISABLE:
-		if (wcd937x->micb_ref[micb_index] > 0)
-			wcd937x->micb_ref[micb_index]--;
-		if ((wcd937x->micb_ref[micb_index] == 0) &&
-		    (wcd937x->pullup_ref[micb_index] > 0))
-			snd_soc_component_update_bits(component, micb_reg,
-				0xC0, 0x80);
-		else if ((wcd937x->micb_ref[micb_index] == 0) &&
-			 (wcd937x->pullup_ref[micb_index] == 0)) {
-			if (pre_off_event && wcd937x->mbhc)
-				blocking_notifier_call_chain(
-					&wcd937x->mbhc->notifier, pre_off_event,
-					&wcd937x->mbhc->wcd_mbhc);
-			snd_soc_component_update_bits(component, micb_reg,
-				0xC0, 0x00);
-			if (post_off_event && wcd937x->mbhc)
-				blocking_notifier_call_chain(
-					&wcd937x->mbhc->notifier,
-					post_off_event,
-					&wcd937x->mbhc->wcd_mbhc);
-		}
-		if (is_dapm && post_dapm_off && wcd937x->mbhc)
-			blocking_notifier_call_chain(
-				&wcd937x->mbhc->notifier, post_dapm_off,
-				&wcd937x->mbhc->wcd_mbhc);
-		break;
-
 	};
 
 	dev_dbg(component->dev, "%s: micb_num:%d, micb_ref: %d, pullup_ref: %d\n",

@@ -1432,7 +1432,7 @@ static int verify_namespace_is_imported(const struct load_info *info,
 	return 0;
 }
 
-#ifndef CONFIG_MACH_XIAOMI
+#ifndef CONFIG_BOARD_XIAOMI
 static bool inherit_taint(struct module *mod, struct module *owner)
 {
 	if (!owner || !test_bit(TAINT_PROPRIETARY_MODULE, &owner->taints))
@@ -1477,7 +1477,7 @@ static const struct kernel_symbol *resolve_symbol(struct module *mod,
 	if (!sym)
 		goto unlock;
 
-#ifndef CONFIG_MACH_XIAOMI
+#ifndef CONFIG_BOARD_XIAOMI
 	if (license == GPL_ONLY)
 		mod->using_gplonly_symbols = true;
 

@@ -1,6 +1,5 @@
 /**
  * Copyright 2020 Mi
- * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 #include <linux/slab.h>

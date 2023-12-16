@@ -2,7 +2,6 @@
 * aw_bin_parse.c
 *
 * Copyright (c) 2020 AWINIC Technology CO., LTD
-* Copyright (C) 2021 XiaoMi, Inc.
 *
 * This program is free software; you can redistribute it and/or modify it
 * under the terms of the GNU General Public License as published by the
@@ -36,7 +35,6 @@
 
 #define AWINIC_CODE_VERSION "V0.0.7-V1.0.4"	/* "code version"-"excel version" */
 
-#define DEBUG_LOG_LEVEL
 #ifdef DEBUG_LOG_LEVEL
 #define DBG(fmt, arg...)   do {\
 printk("AWINIC_BIN %s,line= %d,"fmt, __func__, __LINE__, ##arg);\

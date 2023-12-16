@@ -3,7 +3,6 @@
  *
  *
  * Copyright (c) 2019 AWINIC Technology CO., LTD
- * Copyright (C) 2021 XiaoMi, Inc.
  *
  *  Author: Nick Li <liweilei@awinic.com.cn>
  *
@@ -13,7 +12,6 @@
  * option) any later version.
  */
 
-/* #define DEBUG */
 
 #include <linux/module.h>
 #include <linux/i2c.h>

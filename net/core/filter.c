@@ -8430,7 +8430,7 @@ static u32 sock_ops_convert_ctx_access(enum bpf_access_type type,
 	case offsetof(struct bpf_sock_ops, sk):
 		SOCK_OPS_GET_SK();
 		break;
-#ifdef CONFIG_MACH_XIAOMI
+#ifdef CONFIG_BOARD_XIAOMI
 	case offsetof(struct bpf_sock_ops, sk_uid):
 		SOCK_OPS_GET_FIELD(sk_uid, sk_uid, struct sock);
 		break;

@@ -1,7 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
  * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
- * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 #ifndef __Q6_INIT_H__
@@ -83,6 +82,7 @@ void audio_cal_exit(void);
 void voice_exit(void);
 void q6lsm_exit(void);
 void q6asm_exit(void);
+
 /* for elus start */
 #ifdef CONFIG_ELUS_PROXIMITY
 int elliptic_driver_exit(void);

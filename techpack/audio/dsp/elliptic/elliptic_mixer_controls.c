@@ -1284,7 +1284,7 @@ static const struct snd_kcontrol_new ultrasound_filter_mixer_controls[] = {
 	0,
 	elliptic_system_configuration_param_get,
 	elliptic_system_configuration_param_put),
-   
+    
 	SOC_SINGLE_EXT("Ultrasound RE SEND",
 	ELLIPTIC_SYSTEM_CONFIGURATION,
 	ELLIPTIC_SYSTEM_CONFIGURATION_RE_SEND,
