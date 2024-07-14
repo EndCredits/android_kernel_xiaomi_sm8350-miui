@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 #
-#  build.sh - Automic kernel building script for Rosemary Kernel
+# build.sh - Automic kernel building script for Rosemary Kernel
 #
-#  Copyright (C) 2021-2023, Crepuscular's AOSP WorkGroup
-#  Author: EndCredits <alicization.han@gmail.com>
+# Copyright (C) 2021-2023, Crepuscular's AOSP WorkGroup
+# Author: EndCredits <alicization.han@gmail.com>
 #
-#  This program is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License version 2 as
-#  published by the Free Software Foundation.
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
 #
-#  Add clang to your PATH before using this script.
+# Add clang to your PATH before using this script.
 #
 
 TARGET_ARCH=arm64;
@@ -33,8 +33,10 @@ FINAL_KERNEL_BUILD_PARA="ARCH=$TARGET_ARCH \
 TARGET_KERNEL_FILE=arch/arm64/boot/Image;
 TARGET_KERNEL_DTB=arch/arm64/boot/dtb;
 TARGET_KERNEL_DTBO=arch/arm64/boot/dtbo.img
-TARGET_KERNEL_NAME=Kernel;
+TARGET_KERNEL_NAME=Hana-kernel;
 TARGET_KERNEL_MOD_VERSION=$(make kernelversion)
+
+ANYKERNEL_PATH=anykernel
 
 DEFCONFIG_PATH=arch/arm64/configs
 DEFCONFIG_NAME="star_defconfig";
@@ -66,32 +68,30 @@ build_kernel(){
 
 }
 
-# generate_flashable(){
-#     echo "------------------------------";
-#     echo " Generating Flashable Kernel";
-#     echo "------------------------------";
-# 
-#     cd $TARGET_OUT;
-#     
-#     echo ' Getting AnyKernel ';
-#     curl $ANYKERNEL_URL -o $ANYKERNEL_FILE;
-# 
-#     unzip -o $ANYKERNEL_FILE;
-# 
-#     echo ' Removing old package file ';
-#     rm -rf $ANYKERNEL_PATH/$TARGET_KERNEL_NAME*;
-# 
-#     echo ' Copying Kernel File '; 
-#     cp -r $TARGET_KERNEL_FILE $ANYKERNEL_PATH/;
-#     cp -r $TARGET_KERNEL_DTB $ANYKERNEL_PATH/;
-#     cp -r $TARGET_KERNEL_DTBO $ANYKERNEL_PATH/;
-# 
-#     echo ' Packaging flashable Kernel ';
-#     cd $ANYKERNEL_PATH;
-#     zip -q -r $TARGET_KERNEL_NAME-$CURRENT_TIME-$TARGET_KERNEL_MOD_VERSION.zip *;
+generate_flashable(){
+    echo "------------------------------";
+    echo " Generating Flashable Kernel";
+    echo "------------------------------";
+
+    echo ' Getting AnyKernel ';
+    cp -r ./scripts/ak3 $TARGET_OUT/$ANYKERNEL_PATH
+
+    cd $TARGET_OUT;
+
+    echo ' Removing old package file ';
+    rm -rf $ANYKERNEL_PATH/$TARGET_KERNEL_NAME*;
+
+    echo ' Copying Kernel File '; 
+    cp -r $TARGET_KERNEL_FILE $ANYKERNEL_PATH/;
+    cp -r $TARGET_KERNEL_DTB $ANYKERNEL_PATH/;
+    cp -r $TARGET_KERNEL_DTBO $ANYKERNEL_PATH/;
+
+    echo ' Packaging flashable Kernel ';
+    cd $ANYKERNEL_PATH;
+    zip -q -r $TARGET_KERNEL_NAME-$CURRENT_TIME-$TARGET_KERNEL_MOD_VERSION.zip *;
 #
-#    echo " Target File:  $TARGET_OUT/$ANYKERNEL_PATH/$TARGET_KERNEL_NAME-$CURRENT_TIME-$TARGET_KERNEL_MOD_VERSION.zip ";
-# }
+   echo " Target File:  $TARGET_OUT/$ANYKERNEL_PATH/$TARGET_KERNEL_NAME-$CURRENT_TIME-$TARGET_KERNEL_MOD_VERSION.zip ";
+}
 
 save_defconfig(){
     echo "------------------------------";
@@ -125,25 +125,26 @@ main(){
         echo "    all             Perform a build without cleaning."
         echo "    cleanbuild      Clean the source tree and build files then perform a all build."
         echo
-#         echo "    flashable       Only generate the flashable zip file. Don't use it before you have built once."
-#         echo "    savedefconfig   Save the defconfig file to source tree."
+        echo "    flashable       Only generate the flashable zip file. Don't use it before you have built once."
+        echo "    savedefconfig   Save the defconfig file to source tree."
         echo "    kernelonly      Only build kernel image"
         echo "    defconfig       Only build kernel defconfig"
         echo "    help ( -h )     Print help information."
         echo
-#    elif [ $1 == "savedefconfig" ]
-#    then
-#        save_defconfig;
+   elif [ $1 == "savedefconfig" ]
+   then
+       save_defconfig;
     elif [ $1 == "cleanbuild" ]
     then
         clean;
         make_defconfig;
         build_kernel;
         link_all_dtb_files;
-#        generate_flashable;
-#    elif [ $1 == "flashable" ]
-#    then
-#        generate_flashable;
+       generate_flashable;
+   elif [ $1 == "flashable" ]
+   then
+       link_all_dtb_files
+       generate_flashable;
     elif [ $1 == "kernelonly" ]
     then
         make_defconfig
@@ -153,7 +154,7 @@ main(){
         make_defconfig
         build_kernel
         link_all_dtb_files
-#         generate_flashable
+        generate_flashable
     elif [ $1 == "defconfig" ]
     then
         make_defconfig;
