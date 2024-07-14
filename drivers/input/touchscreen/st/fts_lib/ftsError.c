@@ -67,7 +67,7 @@ static char tag[8] = "[ FTS ]\0";
 
 void logError(int force, const char *msg, ...)
 {
-
+	return;
 	if (force == 1
 #ifdef DEBUG
 		|| 1
