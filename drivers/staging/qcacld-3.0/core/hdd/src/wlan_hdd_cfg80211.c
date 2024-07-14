@@ -9059,10 +9059,6 @@ static int hdd_set_nss(struct hdd_adapter *adapter,
 	return ret;
 }
 
-#ifdef FEATURE_WLAN_DYNAMIC_ARP_NS_OFFLOAD
-#define DYNAMIC_ARP_NS_ENABLE    1
-#define DYNAMIC_ARP_NS_DISABLE   0
-
 #ifdef FEATURE_WLAN_DYNAMIC_NSS
 static int hdd_config_enable_dynamic_nss(struct hdd_adapter *adapter,
 			       const struct nlattr *attr)
@@ -9084,8 +9080,28 @@ static int hdd_config_set_bt_active(struct hdd_adapter *adapter,
 #endif
 
 /**
- * hdd_set_arp_ns_offload() - enable/disable arp/ns offload feature
+ * hdd_config_set_nss_and_antenna_mode() - set the number of spatial streams supported by the adapter
+ * and set responding antenna mode.
  *
+ * @adapter: hdd adapter
+ * @attr: pointer to nla attr
+ *
+ * Return: 0 on success, negative errno on failure
+ */
+static int hdd_config_set_nss_and_antenna_mode(struct hdd_adapter *adapter,
+			       const struct nlattr *attr)
+{
+	uint8_t nss;
+	nss = nla_get_u8(attr);
+	return wlan_hdd_set_nss_and_antenna_mode(adapter, nss, nss);
+}
+
+#ifdef FEATURE_WLAN_DYNAMIC_ARP_NS_OFFLOAD
+#define DYNAMIC_ARP_NS_ENABLE    1
+#define DYNAMIC_ARP_NS_DISABLE   0
+
+/**
+ * hdd_set_arp_ns_offload() - enable/disable arp/ns offload feature
  * @adapter: hdd adapter
  * @attr: pointer to nla attr
  *
@@ -9099,50 +9115,40 @@ static int hdd_set_arp_ns_offload(struct hdd_adapter *adapter,
 	QDF_STATUS qdf_status = QDF_STATUS_E_FAILURE;
 	struct hdd_context *hdd_ctx = WLAN_HDD_GET_CTX(adapter);
 	struct wlan_objmgr_vdev *vdev;
-
 	errno = wlan_hdd_validate_context(hdd_ctx);
 	if (errno)
 		return errno;
-
 	if (!ucfg_pmo_is_arp_offload_enabled(hdd_ctx->psoc) ||
 	    !ucfg_pmo_is_ns_offloaded(hdd_ctx->psoc)) {
 		hdd_err_rl("ARP/NS Offload is disabled by ini");
 		return -EINVAL;
 	}
-
 	if (!ucfg_pmo_is_active_mode_offloaded(hdd_ctx->psoc)) {
 		hdd_err_rl("active mode offload is disabled by ini");
 		return -EINVAL;
 	}
-
 	if (adapter->device_mode != QDF_STA_MODE &&
 	    adapter->device_mode != QDF_P2P_CLIENT_MODE) {
 		hdd_err_rl("only support on sta/p2p-cli mode");
 		return -EINVAL;
 	}
-
 	vdev = hdd_objmgr_get_vdev(adapter);
 	if (!vdev) {
 		hdd_err("vdev is NULL");
 		return -EINVAL;
 	}
-
 	offload_state = nla_get_u8(attr);
-
 	if (offload_state == DYNAMIC_ARP_NS_ENABLE)
 		qdf_status = ucfg_pmo_dynamic_arp_ns_offload_enable(vdev);
 	else if (offload_state == DYNAMIC_ARP_NS_DISABLE)
 		qdf_status = ucfg_pmo_dynamic_arp_ns_offload_disable(vdev);
-
 	if (QDF_IS_STATUS_SUCCESS(qdf_status)) {
 		if (offload_state == DYNAMIC_ARP_NS_ENABLE)
 			ucfg_pmo_dynamic_arp_ns_offload_runtime_allow(vdev);
 		else
 			ucfg_pmo_dynamic_arp_ns_offload_runtime_prevent(vdev);
 	}
-
 	hdd_objmgr_put_vdev(vdev);
-
 	if (QDF_IS_STATUS_ERROR(qdf_status)) {
 		if (qdf_status == QDF_STATUS_E_ALREADY) {
 			hdd_info_rl("already set arp/ns offload %d",
@@ -9151,13 +9157,11 @@ static int hdd_set_arp_ns_offload(struct hdd_adapter *adapter,
 		}
 		return qdf_status_to_os_return(qdf_status);
 	}
-
 	if (!hdd_is_vdev_in_conn_state(adapter)) {
 		hdd_info("set not in connect state, updated state %d",
 			 offload_state);
 		return 0;
 	}
-
 	if (offload_state == DYNAMIC_ARP_NS_ENABLE) {
 		hdd_enable_arp_offload(adapter,
 				       pmo_arp_ns_offload_dynamic_update);
@@ -9169,10 +9173,8 @@ static int hdd_set_arp_ns_offload(struct hdd_adapter *adapter,
 		hdd_disable_ns_offload(adapter,
 				       pmo_arp_ns_offload_dynamic_update);
 	}
-
 	return 0;
 }
-
 #undef DYNAMIC_ARP_NS_ENABLE
 #undef DYNAMIC_ARP_NS_DISABLE
 #endif
@@ -9207,23 +9209,6 @@ static int hdd_set_wfc_state(struct hdd_adapter *adapter,
 		return -EINVAL;
 
 	return pld_set_wfc_mode(hdd_ctx->parent_dev, set_val);
-}
-
-/**
- * hdd_config_set_nss_and_antenna_mode() - set the number of spatial streams supported by the adapter
- * and set responding antenna mode.
- *
- * @adapter: hdd adapter
- * @attr: pointer to nla attr
- *
- * Return: 0 on success, negative errno on failure
- */
-static int hdd_config_set_nss_and_antenna_mode(struct hdd_adapter *adapter,
-			       const struct nlattr *attr)
-{
-	uint8_t nss;
-	nss = nla_get_u8(attr);
-	return wlan_hdd_set_nss_and_antenna_mode(adapter, nss, nss);
 }
 
 /**
@@ -9342,8 +9327,6 @@ static const struct independent_setters independent_setters[] = {
 	{QCA_WLAN_VENDOR_ATTR_CONFIG_ARP_NS_OFFLOAD,
 	 hdd_set_arp_ns_offload},
 #endif
-	{QCA_WLAN_VENDOR_ATTR_CONFIG_WFC_STATE,
-	 hdd_set_wfc_state},
 #ifdef FEATURE_WLAN_DYNAMIC_NSS
 	{QCA_WLAN_VENDOR_ATTR_CONFIG_DYNAMIC_NSS_SWITCH,
 	 hdd_config_enable_dynamic_nss},
@@ -9352,6 +9335,8 @@ static const struct independent_setters independent_setters[] = {
 #endif
 	{QCA_WLAN_VENDOR_ATTR_CONFIG_SET_NSS_ANT,
 	 hdd_config_set_nss_and_antenna_mode},
+	{QCA_WLAN_VENDOR_ATTR_CONFIG_WFC_STATE,
+	 hdd_set_wfc_state},
 };
 
 #ifdef WLAN_FEATURE_ELNA
