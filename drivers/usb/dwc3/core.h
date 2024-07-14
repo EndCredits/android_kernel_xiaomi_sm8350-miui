@@ -1409,6 +1409,8 @@ struct dwc3 {
 	enum gadget_state	gadget_state;
 	/* Indicate if the gadget was powered by the otg driver */
 	unsigned int		vbus_active:1;
+	/* Indicate if software connect was issued by the usb_gadget_driver */
+	unsigned int		softconnect:1;
 	/*
 	 * If true, PM suspend/freeze allowed irrespective of host runtimePM
 	 * state. In PM suspend/resume case, core will stay powered and
