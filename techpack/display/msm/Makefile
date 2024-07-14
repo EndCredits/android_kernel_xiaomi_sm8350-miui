@@ -12,7 +12,6 @@ msm_drm-$(CONFIG_DRM_MSM_DP) += dp/dp_altmode.o \
 	dp/dp_catalog.o \
 	dp/dp_catalog_v420.o \
 	dp/dp_catalog_v200.o \
-	dp/dp_catalog_v500.o \
 	dp/dp_aux.o \
 	dp/dp_panel.o \
 	dp/dp_link.o \
@@ -28,8 +27,7 @@ msm_drm-$(CONFIG_DRM_MSM_DP) += dp/dp_altmode.o \
 	sde_hdcp_1x.o \
 	sde_hdcp_2x.o \
 	dp/dp_pll.o \
-	dp/dp_pll_5nm.o \
-	dp/edp_pll_7nm.o
+	dp/dp_pll_5nm.o
 
 msm_drm-$(CONFIG_DRM_MSM_DP_MST) += dp/dp_mst_drm.o
 
@@ -143,7 +141,22 @@ msm_drm-$(CONFIG_HDCP_QSEECOM) += ../hdcp/msm_hdcp.o \
 
 msm_drm-$(CONFIG_DRM_MSM) += \
 	mi_disp/mi_disp_notifier.o \
-	mi_disp/mi_dsi_display.o
+	mi_disp/mi_disp_core.o \
+	mi_disp/mi_disp_feature.o \
+	mi_disp/mi_disp_sysfs.o \
+	mi_disp/mi_disp_file.o \
+	mi_disp/mi_disp_parser.o \
+	mi_disp/mi_disp_procfs.o \
+	mi_disp/mi_disp_debugfs.o \
+	mi_disp/mi_disp_print.o \
+	mi_disp/mi_disp_log.o \
+	mi_disp/mi_dsi_display.o \
+	mi_disp/mi_dsi_panel.o \
+	mi_disp/mi_sde_connector.o \
+	mi_disp/mi_sde_crtc.o \
+	mi_disp/mi_sde_encoder.o \
+	mi_disp/mi_cooling_device.o \
+	mi_disp/mi_hwconf_manager.o
 
 msm_drm-$(CONFIG_MSM_SDE_ROTATOR) += ../rotator/sde_rotator_dev.o \
 	../rotator/sde_rotator_core.o \

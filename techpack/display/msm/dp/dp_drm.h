@@ -1,6 +1,5 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
- * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
  * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
  */
 
@@ -137,18 +136,6 @@ void dp_connector_post_open(struct drm_connector *connector, void *display);
  * @max_mixer_count: max available mixers for dp display
  * @max_dsc_count: max available dsc for dp display
  */
-
-/**
- * dp_conn_set_info_blob - callback to perform info blob initialization
- * @connector: Pointer to drm connector structure
- * @info: Pointer to sde connector info structure
- * @display: Pointer to private display handle
- * @mode_info: Pointer to mode info structure
- * Returns: Zero on success
- */
-int dp_connector_set_info_blob(struct drm_connector *connector,
-		void *info, void *display, struct msm_mode_info *mode_info);
-
 int dp_drm_bridge_init(void *display, struct drm_encoder *encoder,
 	u32 max_mixer_count, u32 max_dsc_count);
 
@@ -188,12 +175,6 @@ static inline int dp_connector_config_hdr(struct drm_connector *connector,
 
 static inline int dp_connector_atomic_check(struct drm_connector *connector,
 		void *display, struct drm_atomic_state *state)
-{
-	return 0;
-}
-
-static inline int dp_connector_set_backlight(struct drm_connector *connector,
-		void *display, u32 bl_lvl)
 {
 	return 0;
 }
@@ -250,12 +231,6 @@ static inline int dp_connector_get_info(struct drm_connector *connector,
 static inline void dp_connector_post_open(struct drm_connector *connector,
 		void *display)
 {
-}
-
-static inline int dp_connector_set_info_blob(struct drm_connector *connector,
-			void *info, void *display, struct msm_mode_info *mode_info)
-{
-	return 0;
 }
 
 static inline int dp_drm_bridge_init(void *display, struct drm_encoder *encoder,
