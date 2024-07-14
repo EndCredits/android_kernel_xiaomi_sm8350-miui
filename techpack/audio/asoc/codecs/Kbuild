@@ -270,27 +270,27 @@ ifeq ($(KERNEL_BUILD), 1)
 	obj-y	+= rouleur/
 endif
 
-ifneq ($(filter y, $(CONFIG_MACH_XIAOMI_VENUS) $(CONFIG_MACH_XIAOMI_STAR) $(CONFIG_MACH_XIAOMI_HAYDN) $(CONFIG_MACH_XIAOMI_ODIN) $(CONFIG_MACH_XIAOMI_VILI)),)
+ifneq ($(filter y, $(CONFIG_BOARD_XIAOMI_VENUS) $(CONFIG_BOARD_XIAOMI_STAR) $(CONFIG_BOARD_XIAOMI_HAYDN) $(CONFIG_BOARD_XIAOMI_ODIN) $(CONFIG_BOARD_XIAOMI_VILI)),)
 	obj-y	+= cs35l41/
 endif
 
-ifneq ($(filter y, $(CONFIG_MACH_XIAOMI_CETUS) $(CONFIG_MACH_XIAOMI_ARGO)),)
+ifneq ($(filter y, $(CONFIG_BOARD_XIAOMI_CETUS) $(CONFIG_BOARD_XIAOMI_ARGO)),)
 	obj-y	+= cs35l45/
 endif
 
-ifneq ($(filter y, $(CONFIG_MACH_XIAOMI_RENOIR) $(CONFIG_MACH_XIAOMI_LISA)),)
+ifneq ($(filter y, $(CONFIG_BOARD_XIAOMI_RENOIR) $(CONFIG_BOARD_XIAOMI_LISA)),)
 	obj-y	+= tfa98xx/
 endif
 
-ifneq ($(filter y, $(CONFIG_MACH_XIAOMI_TAOYAO)),)
+ifneq ($(filter y, $(CONFIG_BOARD_XIAOMI_TAOYAO)),)
 	obj-y	+= tfa9874/
 endif
 
-ifneq ($(filter y, $(CONFIG_MACH_XIAOMI_MONA) $(CONFIG_MACH_XIAOMI_ZIJIN)),)
+ifneq ($(filter y, $(CONFIG_BOARD_XIAOMI_MONA) $(CONFIG_BOARD_XIAOMI_ZIJIN)),)
 	obj-y	+= aw88263s/
 endif
 
-ifneq ($(filter y, $(CONFIG_MACH_XIAOMI_REDWOOD)),)
+ifneq ($(filter y, $(CONFIG_BOARD_XIAOMI_REDWOOD)),)
 	obj-y	+= aw88263s_m20/
 endif
 
