@@ -1060,6 +1060,17 @@ static int qpnp_pon_input_dispatch(struct qpnp_pon *pon, u32 pon_type)
 	return 0;
 }
 
+typedef int (*mi_display_pm_suspend_callback)(void);
+mi_display_pm_suspend_callback mi_display_cb = NULL;
+
+void mi_display_pm_suspend_callback_set(mi_display_pm_suspend_callback cb)
+{
+	mi_display_cb = cb;
+	printk(KERN_INFO "%s: func %pF is set.\n", __func__, cb);
+	return;
+}
+EXPORT_SYMBOL(mi_display_pm_suspend_callback_set);
+
 static irqreturn_t qpnp_kpdpwr_irq(int irq, void *_pon)
 {
 	int rc;
