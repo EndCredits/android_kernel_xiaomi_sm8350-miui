@@ -15,13 +15,11 @@ endif
 
 ifeq ($(CONFIG_SND_SOC_AUTO), y)
 	ifdef CONFIG_SND_SOC_SA8155
-		CDEFINES += -DCONFIG_SEN_TDM_DISABLE
 		include $(AUDIO_ROOT)/config/sa8155auto.conf
 		export
 		INCS    +=  -include $(AUDIO_ROOT)/config/sa8155autoconf.h
 	endif
 	ifdef CONFIG_SND_SOC_SA6155
-		CDEFINES += -DCONFIG_SEN_TDM_DISABLE
 		include $(AUDIO_ROOT)/config/sa6155auto.conf
 		export
 		INCS    +=  -include $(AUDIO_ROOT)/config/sa6155autoconf.h
@@ -73,11 +71,6 @@ else
 		ifeq ($(CONFIG_ARCH_KONA), y)
 			include $(AUDIO_ROOT)/config/konaauto.conf
 			INCS    +=  -include $(AUDIO_ROOT)/config/konaautoconf.h
-		endif
-		ifeq ($(CONFIG_ARCH_LAHAINA), y)
-			include $(AUDIO_ROOT)/config/lahainaauto.conf
-			export
-			INCS    +=  -include $(AUDIO_ROOT)/config/lahainaautoconf.h
 		endif
 		ifeq ($(CONFIG_ARCH_LITO), y)
 			include $(AUDIO_ROOT)/config/litoauto.conf
@@ -195,7 +188,7 @@ endif
 
 # for gvm sound card driver
 ifdef CONFIG_SND_SOC_GVM_AUTO_SPF
-	SPF_MACHINE_OBJS += gvm_auto_spf_dummy.o
+    SPF_MACHINE_OBJS += gvm_auto_spf_dummy.o
 endif
 
 # for sa8295 sound card driver
@@ -269,79 +262,6 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
 		-Werror\
 		-D__linux__
 
-
-ifeq ($(CONFIG_BOARD_XIAOMI_CETUS), y)
-	CDEFINES += -DCONFIG_TARGET_PRODUCT_CS35L45_4X
-	CDEFINES += -DCONFIG_TARGET_PRODUCT_CETUS
-endif
-
-ifeq ($(CONFIG_BOARD_XIAOMI_VENUS), y)
-	CDEFINES += -DCONFIG_TARGET_PRODUCT_CS35L41_TDM
-	CDEFINES += -DCONFIG_TARGET_PRODUCT_VENUS
-endif
-
-ifeq ($(CONFIG_BOARD_XIAOMI_STAR), y)
-	CDEFINES += -DCONFIG_TARGET_PRODUCT_CS35L41_TDM
-	CDEFINES += -DCONFIG_TARGET_PRODUCT_STAR
-endif
-
-ifeq ($(CONFIG_BOARD_XIAOMI_MARS), y)
-	CDEFINES += -DCONFIG_TARGET_PRODUCT_CS35L41_TDM
-	CDEFINES += -DCONFIG_TARGET_PRODUCT_STAR
-endif
-
-ifeq ($(CONFIG_BOARD_XIAOMI_ODIN), y)
-	CDEFINES += -DCONFIG_TARGET_PRODUCT_CS35L41_TDM
-	CDEFINES += -DCONFIG_TARGET_PRODUCT_ODIN
-endif
-
-ifeq ($(CONFIG_BOARD_XIAOMI_VILI), y)
-	CDEFINES += -DCONFIG_TARGET_PRODUCT_CS35L41_TDM
-	CDEFINES += -DCONFIG_TARGET_PRODUCT_VILI
-endif
-
-ifeq ($(CONFIG_BOARD_XIAOMI_RENOIR), y)
-	CDEFINES += -DCONFIG_SND_SOC_TFA9874
-	CDEFINES += -DCONFIG_SND_SOC_TFA9874_DAVI_I2S
-	CDEFINES += -DTFA_NON_DSP_SOLUTION
-	CDEFINES += -DCONFIG_TARGET_PRODUCT_RENOIR
-	CDEFINES += -DQCOM_HAPTIC_BOB
-endif
-
-ifeq ($(CONFIG_BOARD_XIAOMI_TAOYAO), y)
-	CDEFINES += -DCONFIG_SND_SOC_TFA9874
-	CDEFINES += -DCONFIG_SND_SOC_TFA9874_DAVI_I2S
-	CDEFINES += -DTFA_NON_DSP_SOLUTION
-	CDEFINES += -DCONFIG_TARGET_PRODUCT_TAOYAO
-endif
-
-ifeq ($(CONFIG_BOARD_XIAOMI_LISA), y)
-	CDEFINES += -DCONFIG_SND_SOC_TFA9874
-	CDEFINES += -DCONFIG_SND_SOC_TFA9874_DAVI_TDM
-	CDEFINES += -DTFA_NON_DSP_SOLUTION
-	CDEFINES += -DCONFIG_TARGET_PRODUCT_LISA
-endif
-
-ifeq ($(CONFIG_BOARD_XIAOMI_MONA), y)
-	CDEFINES += -DCONFIG_SND_SOC_AW88263S_TDM
-	CDEFINES += -DCONFIG_TARGET_PRODUCT_MONA
-endif
-
-ifeq ($(CONFIG_BOARD_XIAOMI_REDWOOD), y)
-	CDEFINES += -DCONFIG_SND_SOC_AW88263S_M20_TDM
-	CDEFINES += -DCONFIG_TARGET_PRODUCT_REDWOOD
-endif
-
-ifeq ($(CONFIG_BOARD_XIAOMI_ZIJIN), y)
-	CDEFINES += -DCONFIG_SND_SOC_AW88263S_TDM
-	CDEFINES += -DCONFIG_TARGET_PRODUCT_ZIJIN
-endif
-
-ifeq ($(CONFIG_BOARD_XIAOMI_HAYDN), y)
-	CDEFINES += -DCONFIG_TARGET_PRODUCT_CS35L41_TDM
-	CDEFINES += -DCONFIG_TARGET_PRODUCT_HAYDN
-endif
-
 KBUILD_CPPFLAGS += $(CDEFINES)
 
 # Currently, for versions of gcc which support it, the kernel Makefile
@@ -365,7 +285,6 @@ KBUILD_EXTRA_SYMBOLS +=$(OUT)/obj/vendor/qcom/opensource/audio-kernel/asoc/codec
 endif
 ifeq ($(KERNEL_BUILD), 1)
 	obj-y += codecs/
-	obj-y += iio/
 endif
 # Module information used by KBuild framework
 obj-$(CONFIG_SND_SOC_QDSP6V2) += platform_dlkm.o
@@ -412,3 +331,6 @@ cpe_lsm_dlkm-y := $(CPE_LSM_OBJS)
 
 obj-$(CONFIG_SND_SOC_GVM_AUTO_SPF) += gvm_spf_machine_dlkm.o
 gvm_spf_machine_dlkm-y := $(SPF_MACHINE_OBJS)
+
+# inject some build related information
+DEFINES += -DBUILD_TIMESTAMP=\"$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')\"

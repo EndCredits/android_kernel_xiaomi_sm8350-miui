@@ -21,12 +21,6 @@
 #include <dsp/q6core.h>
 #include "msm-dai-q6-v2.h"
 #include <asoc/core.h>
-#ifdef TFA_NON_DSP_SOLUTION
-#if defined(CONFIG_TARGET_PRODUCT_TAOYAO)
-#include "codecs/tfa9874/inc/tfa_platform_interface_definition.h"
-
-#endif
-#endif
 
 #define MSM_DAI_PRI_AUXPCM_DT_DEV_ID 1
 #define MSM_DAI_SEC_AUXPCM_DT_DEV_ID 2
@@ -68,7 +62,6 @@ enum {
 	ENC_FMT_APTX_HD = ASM_MEDIA_FMT_APTX_HD,
 	ENC_FMT_CELT = ASM_MEDIA_FMT_CELT,
 	ENC_FMT_LDAC = ASM_MEDIA_FMT_LDAC,
-	ENC_FMT_LHDC = ASM_MEDIA_FMT_LHDC,
 	ENC_FMT_APTX_ADAPTIVE = ASM_MEDIA_FMT_APTX_ADAPTIVE,
 	DEC_FMT_APTX_ADAPTIVE = ASM_MEDIA_FMT_APTX_ADAPTIVE,
 	DEC_FMT_MP3 = ASM_MEDIA_FMT_MP3,
@@ -540,7 +533,6 @@ static int clk_id_index;
 static int clk_root_index;
 static int clk_attri_index;
 static int global_dyn_mclk_cfg_portid;
-static bool jitter_cleaner_enable = false; // jitter cleaner ext clock enable/disable
 struct afe_param_id_clock_set_v2_t global_dyn_mclk_cfg = {
 	.clk_set_minor_version = Q6AFE_LPASS_CLK_CONFIG_API_VERSION,
 	.clk_id = Q6AFE_LPASS_CLK_ID_TER_PCM_IBIT,
@@ -3601,11 +3593,6 @@ static int msm_dai_q6_afe_enc_cfg_get(struct snd_kcontrol *kcontrol,
 				&dai_data->enc_config.data,
 				sizeof(struct asm_ldac_enc_cfg_t));
 			break;
-		case ENC_FMT_LHDC:
-			memcpy(ucontrol->value.bytes.data + format_size,
-				&dai_data->enc_config.data,
-				sizeof(struct asm_lhdc_enc_cfg_t));
-			break;
 		case ENC_FMT_APTX_ADAPTIVE:
 			memcpy(ucontrol->value.bytes.data + format_size,
 				&dai_data->enc_config.data,
@@ -3678,11 +3665,6 @@ static int msm_dai_q6_afe_enc_cfg_put(struct snd_kcontrol *kcontrol,
 			memcpy(&dai_data->enc_config.data,
 				ucontrol->value.bytes.data + format_size,
 				sizeof(struct asm_ldac_enc_cfg_t));
-			break;
-		case ENC_FMT_LHDC:
-			memcpy(&dai_data->enc_config.data,
-				ucontrol->value.bytes.data + format_size,
-				sizeof(struct asm_lhdc_enc_cfg_t));
 			break;
 		case ENC_FMT_APTX_ADAPTIVE:
 			memcpy(&dai_data->enc_config.data,
@@ -4483,14 +4465,6 @@ static const struct soc_enum rt_proxy_2_rx_enum =
 
 static const struct soc_enum rt_proxy_1_tx_enum =
 	SOC_ENUM_SINGLE(RT_PROXY_PORT_001_TX, 0, ARRAY_SIZE(afe_cal_mode_text),
-			afe_cal_mode_text);
-
-static const struct soc_enum cdc_dma_tx_4_enum =
-	SOC_ENUM_SINGLE(AFE_PORT_ID_TX_CODEC_DMA_TX_4, 0, ARRAY_SIZE(afe_cal_mode_text),
-			afe_cal_mode_text);
-
-static const struct soc_enum cdc_dma_rx_6_enum =
-	SOC_ENUM_SINGLE(AFE_PORT_ID_RX_CODEC_DMA_RX_6, 0, ARRAY_SIZE(afe_cal_mode_text),
 			afe_cal_mode_text);
 
 static const struct snd_kcontrol_new sb_config_controls[] = {
@@ -6163,18 +6137,7 @@ static int msm_dai_q6_mi2s_hw_params(struct snd_pcm_substream *substream,
 		&mi2s_dai_data->mi2s_dai;
 	struct msm_dai_q6_dai_data *dai_data = &mi2s_dai_config->mi2s_dai_data;
 	struct afe_param_id_i2s_cfg *i2s = &dai_data->port_config.i2s;
-#ifdef TFA_NON_DSP_SOLUTION
-#if defined(CONFIG_TARGET_PRODUCT_TAOYAO)
-	u16 port_id = 0;
 
-	if (msm_mi2s_get_port_id(dai->id, substream->stream,
-				 &port_id) != 0) {
-		dev_err(dai->dev, "%s: Invalid Port ID 0x%x\n",
-				__func__, port_id);
-		return -EINVAL;
-	}
-#endif
-#endif
 	dai_data->channels = params_channels(params);
 	switch (dai_data->channels) {
 	case 15:
@@ -6356,6 +6319,7 @@ static int msm_dai_q6_mi2s_hw_params(struct snd_pcm_substream *substream,
 	dai_data->port_config.i2s.i2s_cfg_minor_version =
 			AFE_API_VERSION_I2S_CONFIG;
 	dai_data->port_config.i2s.sample_rate = dai_data->rate;
+
 	dev_dbg(dai->dev, "%s: dai id %d dai_data->channels = %d\n"
 		"sample_rate = %u i2s_cfg_minor_version = 0x%x\n"
 		"bit_width = %hu  channel_mode = 0x%x mono_stereo = %#x\n"
@@ -10791,7 +10755,7 @@ static int msm_dai_q6_dai_tdm_probe(struct snd_soc_dai *dai)
 	}
 
 	/* add AFE dyn mclk controls */
-	if ((!afe_dyn_mclk_control_added) && (jitter_cleaner_enable)) {
+	if (!afe_dyn_mclk_control_added) {
 		rc = msm_pcm_add_afe_dyn_mclk_control(dai);
 		if (rc < 0) {
 			dev_err(dai->dev, "%s: add AFE dyn mclk control failed DAI: %s\n",
@@ -15522,12 +15486,6 @@ static const struct snd_kcontrol_new cdc_dma_config_controls[] = {
 		     xt_logging_disable_enum[0],
 		     msm_dai_q6_cdc_dma_xt_logging_disable_get,
 		     msm_dai_q6_cdc_dma_xt_logging_disable_put),
-	SOC_ENUM_EXT("CDC_DMA_RX_6 SetCalMode", cdc_dma_rx_6_enum,
-		     msm_dai_q6_cal_info_get,
-		     msm_dai_q6_cal_info_put),
-	SOC_ENUM_EXT("CDC_DMA_TX_4 SetCalMode", cdc_dma_tx_4_enum,
-		     msm_dai_q6_cal_info_get,
-		     msm_dai_q6_cal_info_put),
 };
 
 /* SOC probe for codec DMA interface */
@@ -15559,17 +15517,6 @@ static int msm_dai_q6_dai_cdc_dma_probe(struct snd_soc_dai *dai)
 				 snd_ctl_new1(&cdc_dma_config_controls[1],
 				 dai_data));
 		break;
-	case AFE_PORT_ID_RX_CODEC_DMA_RX_6:
-		rc = snd_ctl_add(dai->component->card->snd_card,
-				 snd_ctl_new1(&cdc_dma_config_controls[2],
-				 dai_data));
-		break;
-	case AFE_PORT_ID_TX_CODEC_DMA_TX_4:
-		rc = snd_ctl_add(dai->component->card->snd_card,
-				 snd_ctl_new1(&cdc_dma_config_controls[3],
-				 dai_data));
-		break;
-
 	default:
 		break;
 	}

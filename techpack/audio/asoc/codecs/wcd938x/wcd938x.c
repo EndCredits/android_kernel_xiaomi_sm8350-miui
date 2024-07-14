@@ -11,7 +11,6 @@
 #include <linux/delay.h>
 #include <linux/kernel.h>
 #include <linux/component.h>
-#include <linux/mmhardware_sysfs.h>
 #include <sound/soc.h>
 #include <sound/tlv.h>
 #include <soc/soundwire.h>
@@ -293,7 +292,7 @@ static int wcd938x_init_reg(struct snd_soc_component *component)
 				((snd_soc_component_read32(component,
 				WCD938X_DIGITAL_EFUSE_REG_30) & 0x07) << 1));
 	snd_soc_component_update_bits(component,
-				WCD938X_HPH_SURGE_HPHLR_SURGE_EN, 0xC0, 0x00);
+				WCD938X_HPH_SURGE_HPHLR_SURGE_EN, 0xC0, 0xC0);
 
 	return 0;
 }
@@ -2162,9 +2161,8 @@ static int wcd938x_event_notify(struct notifier_block *block,
 						     NULL);
 		wcd938x->mbhc->wcd_mbhc.deinit_in_progress = true;
 		mbhc = &wcd938x->mbhc->wcd_mbhc;
-		if(mbhc->mbhc_cfg)
-			wcd938x->usbc_hs_status = get_usbc_hs_status(component,
-							mbhc->mbhc_cfg);
+		wcd938x->usbc_hs_status = get_usbc_hs_status(component,
+						mbhc->mbhc_cfg);
 		wcd938x_mbhc_ssr_down(wcd938x->mbhc, component);
 		wcd938x_reset_low(wcd938x->dev);
 		break;
@@ -2186,8 +2184,7 @@ static int wcd938x_event_notify(struct notifier_block *block,
 			dev_err(component->dev, "%s: mbhc initialization failed\n",
 				__func__);
 		} else {
-			if(mbhc->mbhc_cfg)
-				wcd938x_mbhc_hs_detect(component, mbhc->mbhc_cfg);
+			wcd938x_mbhc_hs_detect(component, mbhc->mbhc_cfg);
 		}
 		wcd938x->mbhc->wcd_mbhc.deinit_in_progress = false;
 		wcd938x->dev_up = true;
@@ -2627,7 +2624,6 @@ static int wcd938x_rx_hph_mode_put(struct snd_kcontrol *kcontrol,
 	return 0;
 }
 
-#if 0
 static int wcd938x_ear_pa_gain_get(struct snd_kcontrol *kcontrol,
 				struct snd_ctl_elem_value *ucontrol)
 {
@@ -2669,7 +2665,6 @@ static int wcd938x_ear_pa_gain_put(struct snd_kcontrol *kcontrol,
 
 	return 0;
 }
-#endif
 
 static int wcd938x_get_compander(struct snd_kcontrol *kcontrol,
 				 struct snd_ctl_elem_value *ucontrol)
@@ -2794,14 +2789,14 @@ static int wcd938x_ldoh_put(struct snd_kcontrol *kcontrol,
 	return 0;
 }
 
-static const char * const tx_master_ch_text[] = {
+const char * const tx_master_ch_text[] = {
 	"ZERO", "SWRM_TX1_CH1", "SWRM_TX1_CH2", "SWRM_TX1_CH3", "SWRM_TX1_CH4",
 	"SWRM_TX2_CH1", "SWRM_TX2_CH2", "SWRM_TX2_CH3", "SWRM_TX2_CH4",
 	"SWRM_TX3_CH1", "SWRM_TX3_CH2", "SWRM_TX3_CH3", "SWRM_TX3_CH4",
 	"SWRM_PCM_IN",
 };
 
-static const struct soc_enum tx_master_ch_enum =
+const struct soc_enum tx_master_ch_enum =
 	SOC_ENUM_SINGLE_EXT(ARRAY_SIZE(tx_master_ch_text),
 					tx_master_ch_text);
 
@@ -2887,10 +2882,6 @@ static int wcd938x_tx_master_ch_put(struct snd_kcontrol *kcontrol,
 	wcd938x_tx_get_slave_ch_type_idx(kcontrol->id.name, &slave_ch_idx);
 
 	if (slave_ch_idx < 0 || slave_ch_idx >= WCD938X_MAX_SLAVE_CH_TYPES)
-		return -EINVAL;
-
-	if (ucontrol->value.enumerated.item[0] < 0 ||
-		ucontrol->value.enumerated.item[0] > WCD938X_MAX_SLAVE_CH_TYPES)
 		return -EINVAL;
 
 	dev_dbg(component->dev, "%s: slave_ch_idx: %d", __func__, slave_ch_idx);
@@ -3066,10 +3057,8 @@ static const struct soc_enum rx_hph_mode_mux_enum =
 			    rx_hph_mode_mux_text);
 
 static const struct snd_kcontrol_new wcd9380_snd_controls[] = {
-#if 0
 	SOC_ENUM_EXT("EAR PA GAIN", wcd938x_ear_pa_gain_enum,
 		wcd938x_ear_pa_gain_get, wcd938x_ear_pa_gain_put),
-#endif
 
 	SOC_ENUM_EXT("RX HPH Mode", rx_hph_mode_mux_enum_wcd9380,
 		wcd938x_rx_hph_mode_get, wcd938x_rx_hph_mode_put),
@@ -3109,8 +3098,8 @@ static const struct snd_kcontrol_new wcd938x_snd_controls[] = {
 	SOC_SINGLE_EXT("ADC2_BCS Disable", SND_SOC_NOPM, 0, 1, 0,
 		wcd938x_bcs_get, wcd938x_bcs_put),
 
-	SOC_SINGLE_TLV("HPHL Volume", WCD938X_HPH_L_EN, 0, 24, 1, line_gain),
-	SOC_SINGLE_TLV("HPHR Volume", WCD938X_HPH_R_EN, 0, 24, 1, line_gain),
+	SOC_SINGLE_TLV("HPHL Volume", WCD938X_HPH_L_EN, 0, 20, 1, line_gain),
+	SOC_SINGLE_TLV("HPHR Volume", WCD938X_HPH_R_EN, 0, 20, 1, line_gain),
 	SOC_SINGLE_TLV("ADC1 Volume", WCD938X_ANA_TX_CH1, 0, 20, 0,
 			analog_gain),
 	SOC_SINGLE_TLV("ADC2 Volume", WCD938X_ANA_TX_CH2, 0, 20, 0,
@@ -4312,10 +4301,6 @@ static int wcd938x_bind(struct device *dev)
 	}
 	wcd938x->dev_up = true;
 
-	/* register codec hardware */
-#ifdef CONFIG_MMHARDWARE_DETECTION
-	register_kobj_under_mmsysfs(MM_HW_CODEC, MM_HARDWARE_SYSFS_CODEC_FOLDER);
-#endif
 	return ret;
 err_irq:
 	wcd_irq_exit(&wcd938x->irq_info, wcd938x->virq);

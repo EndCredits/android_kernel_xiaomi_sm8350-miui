@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /* Copyright (c) 2011-2014, 2017-2019 The Linux Foundation. All rights reserved.
- * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/init.h>
@@ -19,8 +18,7 @@ static int msm_pcm_hostless_prepare(struct snd_pcm_substream *substream)
 		pr_err("%s: invalid params\n", __func__);
 		return -EINVAL;
 	}
-	if (pm_qos_request_active(&substream->latency_pm_qos_req))
-		pm_qos_remove_request(&substream->latency_pm_qos_req);
+	pm_qos_remove_request(&substream->latency_pm_qos_req);
 	return 0;
 }
 

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2012-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
  * Author: Brian Swetland <swetland@google.com>
  *
  * This software is licensed under the terms of the GNU General Public
@@ -2435,15 +2434,6 @@ static int32_t q6asm_callback(struct apr_client_data *data, void *priv)
 
 		config_debug_fs_read_cb();
 
-		if (data->payload_size != (READDONE_IDX_SEQ_ID + 1) * sizeof(uint32_t)) {
-			pr_err("%s:  payload size of %d is less than expected %d.\n",
-					__func__, data->payload_size,
-					((READDONE_IDX_SEQ_ID + 1) * sizeof(uint32_t)));
-			spin_unlock_irqrestore(
-				&(session[session_id].session_lock),
-				flags);
-			return -EINVAL;
-		}
 		dev_vdbg(ac->dev, "%s: ReadDone: status=%d buff_add=0x%x act_size=%d offset=%d\n",
 				__func__, payload[READDONE_IDX_STATUS],
 				payload[READDONE_IDX_BUFADD_LSW],
@@ -2551,16 +2541,7 @@ static int32_t q6asm_callback(struct apr_client_data *data, void *priv)
 				__func__, data->payload_size);
 		break;
 	case ASM_SESSION_CMDRSP_GET_MTMX_STRTR_PARAMS_V2:
-		payload_size = sizeof(struct asm_mtmx_strtr_get_params_cmdrsp);
-		if (data->payload_size < payload_size) {
-			pr_err("%s: insufficient payload size = %d\n",
-				__func__, data->payload_size);
-			spin_unlock_irqrestore(
-				&(session[session_id].session_lock), flags);
-			return -EINVAL;
-		}
-		q6asm_process_mtmx_get_param_rsp(ac,
-			(struct asm_mtmx_strtr_get_params_cmdrsp *) payload);
+		q6asm_process_mtmx_get_param_rsp(ac, (void *) payload);
 		break;
 	case ASM_STREAM_PP_EVENT:
 	case ASM_STREAM_CMD_ENCDEC_EVENTS:
@@ -7418,20 +7399,6 @@ static int __q6asm_media_format_block_multi_ch_pcm_v5(struct audio_client *ac,
 			 PCM_FORMAT_MAX_NUM_CHANNEL_V8);
 	}
 
-	if (fmt.param.num_channels==2) {
-		if (channel_mapping[0] == 0 || channel_mapping[1] ==0) {
-			pr_err("%s: chnl map wrong %d, %d\n", __func__,
-				channel_mapping[0], channel_mapping[1]);
-			channel_mapping[0] = 1;
-			channel_mapping[1] = 2;
-		}
-	} else if (fmt.param.num_channels==1) {
-		if (channel_mapping[0] !=3){
-			pr_err("%s: chnl map wrong %d", __func__, channel_mapping[0]);
-			channel_mapping[0] = 3;
-		}
-	}
-
 	rc = apr_send_pkt(ac->apr, (uint32_t *) &fmt);
 	if (rc < 0) {
 		pr_err("%s: Comamnd open failed %d\n", __func__, rc);
@@ -11408,12 +11375,6 @@ static int q6asm_get_asm_topology_apptype(struct q6asm_cal_info *cal_info, struc
 		cal_block->cal_info)->topology;
 	cal_info->app_type = ((struct audio_cal_info_asm_top *)
 		cal_block->cal_info)->app_type;
-
-	if (0 == cal_info->topology_id) {
-		cal_info->topology_id = 0x10c68;;
-		pr_err("%s: Correct using topology %d app_type %d\n", __func__,
-			cal_info->topology_id, cal_info->app_type);
-	}
 
 	cal_utils_mark_cal_used(cal_block);
 

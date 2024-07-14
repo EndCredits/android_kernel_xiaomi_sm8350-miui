@@ -30,11 +30,6 @@ ifeq ($(KERNEL_BUILD), 0)
 		include $(AUDIO_ROOT)/config/konaauto.conf
 		INCS    +=  -include $(AUDIO_ROOT)/config/konaautoconf.h
 	endif
-	ifeq ($(CONFIG_ARCH_LAHAINA), y)
-		include $(AUDIO_ROOT)/config/lahainaauto.conf
-		export
-		INCS    +=  -include $(AUDIO_ROOT)/config/lahainaautoconf.h
-	endif
 	ifeq ($(CONFIG_ARCH_LITO), y)
 		include $(AUDIO_ROOT)/config/litoauto.conf
 		export
@@ -121,13 +116,6 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
 		-Werror\
 		-D__linux__
 
-ifeq ($(CONFIG_BOARD_XIAOMI_ZIJIN), y)
-	CDEFINES += -DCONFIG_TARGET_PRODUCT_ZIJIN
-endif
-ifeq ($(CONFIG_BOARD_XIAOMI_TAOYAO), y)
-	CDEFINES += -DCONFIG_TARGET_PRODUCT_TAOYAO
-endif
-
 KBUILD_CPPFLAGS += $(CDEFINES)
 
 # Currently, for versions of gcc which support it, the kernel Makefile
@@ -151,10 +139,6 @@ KBUILD_EXTRA_SYMBOLS +=$(OUT)/obj/vendor/qcom/opensource/audio-kernel/asoc/codec
 KBUILD_EXTRA_SYMBOLS +=$(OUT)/obj/vendor/qcom/opensource/audio-kernel/soc/Module.symvers
 endif
 
-ifeq ($(CONFIG_BOARD_XIAOMI_TAOYAO), y)
-	CDEFINES += -DCONFIG_TARGET_PRODUCT_TAOYAO
-endif
-
 # Module information used by KBuild framework
 obj-$(CONFIG_SND_SOC_BOLERO) += bolero_cdc_dlkm.o
 bolero_cdc_dlkm-y := $(BOLERO_OBJS)
@@ -170,3 +154,6 @@ tx_macro_dlkm-y := $(TX_OBJS)
 
 obj-$(CONFIG_RX_MACRO) += rx_macro_dlkm.o
 rx_macro_dlkm-y := $(RX_OBJS)
+
+# inject some build related information
+DEFINES += -DBUILD_TIMESTAMP=\"$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')\"

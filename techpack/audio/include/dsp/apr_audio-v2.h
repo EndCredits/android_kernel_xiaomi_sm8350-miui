@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
  * Copyright (c) 2012-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2023, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022, Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 
@@ -29,11 +29,6 @@ struct param_outband {
 /* Common structures and definitions used for instance ID support */
 /* Instance ID definitions */
 #define INSTANCE_ID_0 0x0000
-
-struct adm_register_event {
-	struct apr_hdr hdr;
-	__u8 payload[0];
-} __packed;
 
 struct mem_mapping_hdr {
 	/*
@@ -140,10 +135,6 @@ struct module_instance_info {
 
 #define ADM_CMD_MATRIX_MAP_ROUTINGS_V5 0x00010325
 #define ADM_CMD_STREAM_DEVICE_MAP_ROUTINGS_V5 0x0001033D
-
-#define ADM_CMD_REGISTER_EVENT  0x00010365
-#define ADM_PP_EVENT            0x00010366
-
 /* Enumeration for an audio Rx matrix ID.*/
 #define ADM_MATRIX_ID_AUDIO_RX              0
 
@@ -333,11 +324,9 @@ struct adm_cmd_device_open_v5 {
  */
 
 	u16                  endpoint_id_2;
-/* Endpoint 2 is set with 0xFFFF by default.
- * In cases of ECREF, Endpoint 2 can be set with the ecref AFE port id,
- * which will be connected to the TX block.
- * ECREF data is given as input to the TX block.
- * Endpoint 2 is applicable to audio CoPreP.
+/* Logical and physical endpoint ID 2 for a voice processor
+ * Tx block.
+ * This is not applicable to audio COPP.
  * Supported values:
  * - AFE Rx port
  * - 0xFFFF -- Endpoint 2 is unavailable and the voice
@@ -425,11 +414,9 @@ struct adm_cmd_device_open_v6 {
  */
 
 	u16                  endpoint_id_2;
-/* Endpoint 2 is set with 0xFFFF by default.
- * In cases of ECREF, Endpoint 2 can be set with the ecref AFE port id,
- * which will be connected to the TX block.
- * ECREF data is given as input to the TX block.
- * Endpoint 2 is applicable to audio CoPreP.
+/* Logical and physical endpoint ID 2 for a voice processor
+ * Tx block.
+ * This is not applicable to audio COPP.
  * Supported values:
  * - AFE Rx port
  * - 0xFFFF -- Endpoint 2 is unavailable and the voice
@@ -593,11 +580,9 @@ struct adm_cmd_device_open_v8 {
  */
 
 	u16                  endpoint_id_2;
-/* Endpoint 2 is set with 0xFFFF by default.
- * In cases of ECREF, Endpoint 2 can be set with the ecref AFE port id,
- * which will be connected to the TX block.
- * ECREF data is given as input to the TX block.
- * Endpoint 2 is applicable to audio CoPreP.
+/* Logical and physical endpoint ID 2 for a voice processor
+ * Tx block.
+ * This is not applicable to audio COPP.
  * Supported values:
  * - AFE Rx port
  * - 0xFFFF -- Endpoint 2 is unavailable and the voice
@@ -681,26 +666,6 @@ struct dsp_stream_callback_list {
 };
 
 struct dsp_stream_callback_prtd {
-	uint16_t event_count;
-	struct list_head event_queue;
-	spinlock_t prtd_spin_lock;
-};
-
-#define DSP_ADM_CALLBACK "ADSP COPP Callback Event"
-#define DSP_ADM_CALLBACK_QUEUE_SIZE 1024
-
-struct dsp_adm_callback_list {
-	struct list_head list;
-	struct msm_adsp_event_data event;
-};
-
-struct adm_usr_info {
-	u32 service_id;
-	u32 reserved;
-	u32 token_coppidx;
-};
-
-struct dsp_adm_callback_prtd {
 	uint16_t event_count;
 	struct list_head event_queue;
 	spinlock_t prtd_spin_lock;
@@ -1376,16 +1341,6 @@ struct adm_cmd_connect_afe_port_v5 {
  */
 } __packed;
 
-/* Allows a client to notify adsp the device model */
-
-#define ADM_CMD_SET_DEVICE_MODEL	0x00011112
-
-/*  Payload of the #ADM_CMD_SET_DEVICE_MODEL command.*/
-struct adm_cmd_set_device_model {
-	struct apr_hdr     hdr;
-	u8                 model;
-/* ID of the device model */
-} __packed;
 
 /* adsp_adm_api.h */
 
@@ -2674,7 +2629,6 @@ struct afe_event_rt_proxy_port_status {
 } __packed;
 
 #define AFE_PORT_DATA_CMD_RT_PROXY_PORT_WRITE_V2 0x000100ED
-#define AFE_PORT_SEND_DATA_CMD   0x00011111
 
 struct afe_port_data_cmd_rt_proxy_port_write_v2 {
 	struct apr_hdr hdr;
@@ -4205,7 +4159,7 @@ struct afe_param_id_cdc_dma_data_align {
 	uint32_t	cdc_dma_data_align;
 } __packed;
 
-#define MAX_ABR_LEVELS 6
+#define MAX_ABR_LEVELS 5
 
 struct afe_bit_rate_level_map_t {
 	/*
@@ -4879,61 +4833,6 @@ struct asm_ldac_enc_cfg_t {
 	struct afe_abr_enc_cfg_t abr_config;
 } __packed;
 
-#define ASM_MEDIA_FMT_LHDC 0x1000B400
-#define ENC_CODEC_TYPE_LHDC 0x28000000
-struct asm_lhdc_specific_enc_cfg_t {
-	uint32_t                     version;
-	uint32_t                     ll_enabled;
-	uint32_t                     max_bitrate;
-	/*
-	 * @Range(in bits per second)
-	 * 256000
-	 * 300000
-	 * 400000
-	 * 500000
-	 * 900000
-	 */
-	uint32_t                     bit_rate;
-	/*
-	 * bit0 channel split compress disable
-	 * bit1 channel split compress (for forwarding type TWS used)
-	 * bit2 channel split compress. pre-split left/right frame at encode side
-	 */
-	uint32_t                     channel_split_mode;
-	/*
-	 * The channel setting information for LHDC specification
-	 * of Bluetooth A2DP which is determined by SRC and SNK
-	 * devices in Bluetooth transmission.
-	 * @Range:
-	 * 0 for native mode
-	 * 4 for mono
-	 * 2 for dual channel
-	 * 1 for stereo
-	 */
-	uint16_t                     channel_mode;
-	/*
-	 * Maximum Transmission Unit (MTU).
-	 * The minimum MTU that a L2CAP implementation for LHDC shall
-	 * support is 679 bytes, because LHDC is optimized with 2-DH5
-	 * packet as its target.
-	 * @Range : 679
-	 * @Default: 679 for LHDCBT_MTU_2DH5
-	 */
-	uint16_t                     mtu;
-	uint32_t                     ar_enabled;
-	uint32_t                     meta_enabled;
-	uint32_t                     llac_enabled;
-	uint32_t                     mbr_enabled;
-	uint32_t                     larc_enabled;
-} __packed;
-
-struct asm_lhdc_enc_cfg_t {
-	struct asm_custom_enc_cfg_t  custom_config;
-	struct asm_lhdc_specific_enc_cfg_t  lhdc_specific_config;
-	struct afe_abr_enc_cfg_t abr_config;
-} __packed;
-
-
 struct afe_enc_fmt_id_param_t {
 	/*
 	 * Supported values:
@@ -5128,7 +5027,6 @@ union afe_enc_config_data {
 	struct asm_celt_enc_cfg_t  celt_config;
 	struct asm_aptx_enc_cfg_t  aptx_config;
 	struct asm_ldac_enc_cfg_t  ldac_config;
-	struct asm_lhdc_enc_cfg_t  lhdc_config;
 	struct asm_aptx_ad_enc_cfg_t  aptx_ad_config;
 	struct asm_aptx_ad_speech_enc_cfg_t aptx_ad_speech_config;
 	struct asm_enc_lc3_cfg_t lc3_enc_config;
@@ -13586,29 +13484,10 @@ struct adm_set_compressed_device_latency {
 #define VOICEPROC_MODULE_ID_FLUENCE_PRO_VC_TX               0x00010F35
 #define VOICEPROC_PARAM_ID_FLUENCE_SOUNDFOCUS               0x00010E37
 #define VOICEPROC_PARAM_ID_FLUENCE_SOURCETRACKING           0x00010E38
-#define AUDPROC_PARAM_ID_FLUENCE_NN_SOURCE_TRACKING         0x00010B83
-#define MODULE_ID_FLUENCE_NN                                0x00010B0F
 #define MAX_SECTORS                                         8
 #define MAX_NOISE_SOURCE_INDICATORS                         3
 #define MAX_POLAR_ACTIVITY_INDICATORS                       360
 #define MAX_DOA_TRACKING_ANGLES                             2
-#define MAX_TOP_SPEAKERS                                    5
-#define MAX_FOCUS_DIRECTION                                 2
-
-struct fluence_nn_sound_focus_param {
-	int16_t mode;
-	int16_t focus_direction[MAX_FOCUS_DIRECTION];
-	int16_t focus_width;
-} __packed;
-
-struct fluence_nn_source_tracking_param {
-	int32_t speech_probablity_q20;
-	int16_t speakers[MAX_TOP_SPEAKERS];
-	int16_t reserved;
-	uint8_t polarActivity[MAX_POLAR_ACTIVITY_INDICATORS];
-	uint32_t session_time_lsw;
-	uint32_t session_time_msw;
-} __packed;
 
 struct sound_focus_param {
 	uint16_t start_angle[MAX_SECTORS];
@@ -13627,21 +13506,6 @@ struct doa_tracking_mon_param {
 	uint16_t target_angle_L16[MAX_DOA_TRACKING_ANGLES];
 	uint16_t interf_angle_L16[MAX_DOA_TRACKING_ANGLES];
 	uint8_t polar_activity[MAX_POLAR_ACTIVITY_INDICATORS];
-} __packed;
-
-struct adm_param_fluence_nn_sound_focus_t {
-	int16_t mode;
-	int16_t focus_direction[2];
-	int16_t focus_width;
-} __packed;
-
-struct adm_param_fluence_nn_source_tracking_t {
-	int32_t speech_probablity_q20;
-	int16_t speakers[5];
-	int16_t reserved;
-	uint8_t polarActivity[360];
-	uint32_t session_time_lsw;
-	uint32_t session_time_msw;
 } __packed;
 
 struct adm_param_fluence_soundfocus_t {
