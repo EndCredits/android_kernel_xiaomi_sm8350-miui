@@ -101,7 +101,7 @@ static int sysmeminfo_process(int force_reclaim_type, u64 reclaim_pages, unsigne
 	return 1;
 }
 
-static inline void do_reclaim()
+static inline void do_reclaim(void)
 {
 	int event_type;
 	int reclaim_need;
