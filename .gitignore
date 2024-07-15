@@ -147,10 +147,6 @@ x509.genkey
 # Clang's compilation database file
 /compile_commands.json
 
-# generated defconfigs
-arch/*/configs/vendor/*_defconfig
-!arch/arm64/configs/vendor/lahaina-qgki_defconfig
-
 # vendor device tree directories
 arch/arm/boot/dts/vendor
 
