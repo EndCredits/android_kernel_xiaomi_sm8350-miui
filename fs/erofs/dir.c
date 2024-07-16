@@ -2,6 +2,7 @@
 /*
  * Copyright (C) 2017-2018 HUAWEI, Inc.
  *             https://www.huawei.com/
+ * Created by Gao Xiang <gaoxiang25@huawei.com>
  */
 #include "internal.h"
 
@@ -138,3 +139,4 @@ const struct file_operations erofs_dir_fops = {
 	.read		= generic_read_dir,
 	.iterate_shared	= erofs_readdir,
 };
+

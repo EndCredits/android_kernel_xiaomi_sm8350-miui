@@ -2,6 +2,7 @@
 /*
  * Copyright (C) 2019 HUAWEI, Inc.
  *             https://www.huawei.com/
+ * Created by Gao Xiang <gaoxiang25@huawei.com>
  */
 #include "compress.h"
 #include <linux/module.h>
@@ -409,3 +410,4 @@ int z_erofs_decompress(struct z_erofs_decompress_req *rq,
 		return z_erofs_shifted_transform(rq, pagepool);
 	return z_erofs_decompress_generic(rq, pagepool);
 }
+
