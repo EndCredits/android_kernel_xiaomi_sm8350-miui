@@ -84,8 +84,7 @@ struct z_erofs_pcluster {
 
 #define Z_EROFS_WORKGROUP_SIZE  sizeof(struct z_erofs_pcluster)
 
-struct z_erofs_decompressqueue {
-	struct super_block *sb;
+struct z_erofs_unzip_io {
 	atomic_t pending_bios;
 	z_erofs_next_pcluster_t head;
 
@@ -93,6 +92,11 @@ struct z_erofs_decompressqueue {
 		wait_queue_head_t wait;
 		struct work_struct work;
 	} u;
+};
+
+struct z_erofs_unzip_io_sb {
+	struct z_erofs_unzip_io io;
+	struct super_block *sb;
 };
 
 #define MNGD_MAPPING(sbi)	((sbi)->managed_cache->i_mapping)
