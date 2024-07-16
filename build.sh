@@ -73,13 +73,13 @@ generate_flashable(){
     echo " Generating Flashable Kernel";
     echo "------------------------------";
 
+    echo ' Removing old package file ';
+    rm -rf $TARGET_OUT/$ANYKERNEL_PATH;
+
     echo ' Getting AnyKernel ';
     cp -r ./scripts/ak3 $TARGET_OUT/$ANYKERNEL_PATH
 
     cd $TARGET_OUT;
-
-    echo ' Removing old package file ';
-    rm -rf $ANYKERNEL_PATH/$TARGET_KERNEL_NAME*;
 
     echo ' Copying Kernel File '; 
     cp -r $TARGET_KERNEL_FILE $ANYKERNEL_PATH/;
