@@ -149,7 +149,7 @@ static int erofs_read_superblock(struct super_block *sb)
 	}
 
 	sbi->feature_compat = le32_to_cpu(dsb->feature_compat);
-	if (erofs_sb_has_sb_chksum(sbi)) {
+	if (sbi->feature_compat & EROFS_FEATURE_COMPAT_SB_CHKSUM) {
 		ret = erofs_superblock_csum_verify(sb, data);
 		if (ret)
 			goto out;
