@@ -83,7 +83,8 @@ repeat:
 }
 
 int erofs_register_workgroup(struct super_block *sb,
-			     struct erofs_workgroup *grp)
+			     struct erofs_workgroup *grp,
+			     bool tag)
 {
 	struct erofs_sb_info *sbi;
 	int err;
@@ -101,7 +102,7 @@ int erofs_register_workgroup(struct super_block *sb,
 	sbi = EROFS_SB(sb);
 	xa_lock(&sbi->workstn_tree);
 
-	grp = xa_tag_pointer(grp, 0);
+	grp = xa_tag_pointer(grp, tag);
 
 	/*
 	 * Bump up reference count before making this workgroup
