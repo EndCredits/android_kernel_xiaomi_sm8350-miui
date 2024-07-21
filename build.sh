@@ -39,7 +39,6 @@ TARGET_KERNEL_MOD_VERSION=$(make kernelversion)
 ANYKERNEL_PATH=anykernel
 
 DEFCONFIG_PATH=arch/arm64/configs
-DEFCONFIG_NAME="vendor/star_defconfig";
 
 START_SEC=$(date +%s);
 CURRENT_TIME=$(date '+%Y-%m%d%H%M');
@@ -73,6 +72,8 @@ generate_flashable(){
     echo " Generating Flashable Kernel";
     echo "------------------------------";
 
+    FLASHABLE_KERNEL_NAME="${TARGET_KERNEL_NAME}-${TARGET_DEVICE}-${CURRENT_TIME}-${TARGET_KERNEL_MOD_VERSION}"
+
     echo ' Removing old package file ';
     rm -rf $TARGET_OUT/$ANYKERNEL_PATH;
 
@@ -81,6 +82,9 @@ generate_flashable(){
 
     cd $TARGET_OUT;
 
+    echo ' Setting device info ';
+    sed -i "s/DEVICE_PLACEHOLDER/${TARGET_DEVICE}/g" $ANYKERNEL_PATH/anykernel.sh
+
     echo ' Copying Kernel File '; 
     cp -r $TARGET_KERNEL_FILE $ANYKERNEL_PATH/;
     # cp -r $TARGET_KERNEL_DTB $ANYKERNEL_PATH/;
@@ -88,9 +92,9 @@ generate_flashable(){
 
     echo ' Packaging flashable Kernel ';
     cd $ANYKERNEL_PATH;
-    zip -q -r $TARGET_KERNEL_NAME-$CURRENT_TIME-$TARGET_KERNEL_MOD_VERSION.zip *;
+    zip -q -r ${FLASHABLE_KERNEL_NAME}.zip *;
 #
-   echo " Target File:  $TARGET_OUT/$ANYKERNEL_PATH/$TARGET_KERNEL_NAME-$CURRENT_TIME-$TARGET_KERNEL_MOD_VERSION.zip ";
+   echo " Target File:  ../out/anykernel/${FLASHABLE_KERNEL_NAME}.zip ";
 }
 
 save_defconfig(){
@@ -115,11 +119,9 @@ clean(){
     rm -rf $TARGET_OUT;
 }
 
-main(){
-    if [ $1 == "help" -o $1 == "-h" ]
-    then
+display_help() {
         echo "build.sh: A very simple Kernel build helper"
-        echo "usage: build.sh <build option>"
+        echo "usage: build.sh <build option> <device>"
         echo
         echo "Build options:"
         echo "    all             Perform a build without cleaning."
@@ -131,8 +133,24 @@ main(){
         echo "    defconfig       Only build kernel defconfig"
         echo "    help ( -h )     Print help information."
         echo
-   elif [ $1 == "savedefconfig" ]
-   then
+}
+
+main(){
+    if [ $2 ]; then
+        echo "Building for ${2}"
+    else
+        echo "Missing device. Please check usage"
+        echo
+        display_help
+        exit -1
+    fi
+    TARGET_DEVICE=$2
+    DEFCONFIG_NAME="vendor/${TARGET_DEVICE}_defconfig";
+    if [ $1 == "help" -o $1 == "-h" ]
+    then
+        display_help
+    elif [ $1 == "savedefconfig" ]
+    then
        save_defconfig;
     elif [ $1 == "cleanbuild" ]
     then
@@ -140,11 +158,11 @@ main(){
         make_defconfig;
         build_kernel;
         link_all_dtb_files;
-       generate_flashable;
-   elif [ $1 == "flashable" ]
-   then
-       link_all_dtb_files
-       generate_flashable;
+        generate_flashable;
+    elif [ $1 == "flashable" ]
+    then
+        link_all_dtb_files
+        generate_flashable;
     elif [ $1 == "kernelonly" ]
     then
         make_defconfig
@@ -159,10 +177,8 @@ main(){
     then
         make_defconfig;
     else
-        echo "Incorrect usage. Please run: "
-        echo "  bash build.sh help (or -h) "
-        echo "to display help message."
+        display_help
     fi
 }
 
-main "$1";
+main "$1" "$2";

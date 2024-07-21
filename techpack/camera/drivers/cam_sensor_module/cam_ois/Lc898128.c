@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
- * Copyright (C) 2020 XiaoMi, Inc.
  */
 
 #include <linux/module.h>
@@ -482,9 +481,6 @@ uint32_t CheckFwValid(struct cam_ois_ctrl_t *o_ctrl, uint8_t CurrentFwVersion)
 	uint32_t is_fw_valid = 0;
 	uint32_t fw_version = 0;
 	uint8_t i;
-	uint32_t x_gyro_gain = 0;
-        uint32_t y_gyro_gain = 0;
-        uint8_t tmp;
 
 	CAM_DBG(CAM_OIS, "checking fw");
 
@@ -502,20 +498,10 @@ uint32_t CheckFwValid(struct cam_ois_ctrl_t *o_ctrl, uint8_t CurrentFwVersion)
 		fw_version &= 0xFF;
 		if (fw_version != CurrentFwVersion){
 			is_fw_valid = 0;
-		} else if (fw_version == 0x2){
-			RamRead32A(o_ctrl, 0x82B8, &x_gyro_gain);
-			RamRead32A(o_ctrl, 0x8318, &y_gyro_gain);
-			tmp = (y_gyro_gain >> 31);
-			if (tmp == 0){
-				y_gyro_gain = ~y_gyro_gain + 1;
-                                RamWrite32A(o_ctrl, 0x82B8, x_gyro_gain, 0);
-                                RamWrite32A(o_ctrl, 0x8318, y_gyro_gain, 0);
-				WrGyroGainData (o_ctrl,1);
-			}
 		}
 	}
 
-	CAM_DBG(CAM_OIS, "is_fw_valid %d, fw_version 0x%x, ,x_gyro_gain 0x%x, y_gyro_gain 0x%x", is_fw_valid, fw_version, x_gyro_gain, y_gyro_gain);
+	CAM_DBG(CAM_OIS, "is_fw_valid %d, fw_version 0x%x", is_fw_valid, fw_version);
 
 	return is_fw_valid;
 }

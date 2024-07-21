@@ -1,1 +1,0 @@
-#define TARGET_PRODUCT_HAYDN 1

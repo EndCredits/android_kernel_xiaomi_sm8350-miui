@@ -19,7 +19,7 @@ module_param(debug_type, uint, 0644);
 
 struct camera_debug_settings cam_debug;
 
-const struct camera_debug_settings *cam_debug_get_settings(void)
+const struct camera_debug_settings *cam_debug_get_settings()
 {
 	return &cam_debug;
 }

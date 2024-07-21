@@ -19,7 +19,6 @@
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
 #include <linux/uaccess.h>
-#include <linux/hwid.h>
 
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 38)
 #include <linux/input/mt.h>
@@ -34,7 +33,6 @@
 #define CORE_MODULE_PROB_SUCCESS		1
 #define CORE_MODULE_PROB_FAILED			-1
 #define CORE_MODULE_REMOVED				-2
-#define OLED_JUDGE_ID					(17+307)
 int core_module_prob_sate = CORE_MODULE_UNPROBED;
 struct goodix_module goodix_modules;
 struct goodix_ts_core *goodix_core_data;
@@ -1098,21 +1096,8 @@ void goodix_match_fw(struct goodix_ts_core *ts_data)
 	if (is_lockdown_empty(ts_data->lockdown_info))
 		goodix_ts_get_lockdowninfo(ts_data);
 	if (goodix_get_panel_type(ts_data) < 0) {
-		switch (get_hw_version_platform()) {
-			case HARDWARE_PROJECT_K9:
-				ts->fw_name = TS_DEFAULT_FIRMWARE_K9;
-				ts->cfg_bin_name = TS_DEFAULT_CFG_BIN_K9;
-				break;
-			case HARDWARE_PROJECT_K9D:
-				ts->fw_name = TS_DEFAULT_FIRMWARE_K9D;
-				ts->cfg_bin_name = TS_DEFAULT_CFG_BIN_K9D;
-				break;
-			default:
-				ts->fw_name = TS_DEFAULT_FIRMWARE;
-				ts->cfg_bin_name = TS_DEFAULT_CFG_BIN;
-				break;
-		}
-
+		ts->fw_name = TS_DEFAULT_FIRMWARE;
+		ts->cfg_bin_name = TS_DEFAULT_CFG_BIN;
 	} else {
 		ts->fw_name = ts->config_array[ts->panel_index].gdx_fw_name;
 		ts->cfg_bin_name =ts->config_array[ts->panel_index].gdx_cfg_name;
@@ -1130,9 +1115,13 @@ static int goodix_parse_dt(struct device *dev,
 {
 	const char *name_tmp;
 	int r;
+	struct device_node *node = dev->of_node;
+
+#ifdef CONFIG_BOARD_XAIOMI_LISA
 	uint32_t temp_val;
-	struct device_node *temp, *node = dev->of_node;
+	struct device_node *temp = dev->of_node;
 	struct goodix_config_info *config_info;
+#endif
 
 	if (!board_data) {
 		ts_err("invalid board data");
@@ -1205,6 +1194,7 @@ static int goodix_parse_dt(struct device *dev,
 		board_data->panel_max_y, board_data->panel_max_w,
 		board_data->panel_max_p);
 
+#ifdef CONFIG_BOARD_XIAOMI_LISA
 	r= of_property_read_u32(node, "goodix,config-array-size", &board_data->config_array_size);
 	if (r) {
 		ts_err("Unable to get array size\n");
@@ -1251,6 +1241,7 @@ static int goodix_parse_dt(struct device *dev,
 
 		config_info++;
 	}
+#endif
 
 	return 0;
 }
@@ -3194,16 +3185,6 @@ static struct platform_driver goodix_ts_driver = {
 static int __init goodix_ts_core_init(void)
 {
 	int ret;
-
-	if (get_hw_version_platform() == HARDWARE_PROJECT_K9) {
-		gpio_direction_input(OLED_JUDGE_ID);
-		if (gpio_get_value(OLED_JUDGE_ID)) {
-			ts_err("TP is goodix");
-		} else {
-			ts_err("TP is focal");
-			return 0;
-		}
-	}
 
 	ts_info("Core layer init:%s", GOODIX_DRIVER_VERSION);
 	ret = goodix_bus_init();

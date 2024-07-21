@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-2.0-only
 
-ifneq ($(CONFIG_BOARD_XIAOMI_STAR), y)
+ifdef CONFIG_USE_COMMON_CAMERA
 # auto-detect subdirs
 ifneq ($(CONFIG_ARCH_QTI_VM), y)
 ifeq ($(CONFIG_ARCH_KONA), y)
@@ -93,11 +93,23 @@ LINUXINCLUDE    += \
 		-include $(srctree)/techpack/camera/config/sm6150cameraconf.h
 endif
 
-ifeq ($(CONFIG_BOARD_XIAOMI_HAYDN), y)
-LINUXINCLUDE    += \
-		-include $(srctree)/techpack/camera/config/haydncameraconf.h
 endif
 
+#add camera macro
+ifdef CONFIG_BOARD_XIAOMI_ZIJIN
+    KBUILD_CPPFLAGS += -DZIJIN_CAM
+endif
+
+ifdef CONFIG_BOARD_XIAOMI_TAOYAO
+    KBUILD_CPPFLAGS += -DTAOYAO_CAM
+endif
+
+ifdef CONFIG_BOARD_XIAOMI_RERDWOOD
+    KBUILD_CPPFLAGS += -DREDWOOD_CAM
+endif
+
+ifdef CONFIG_BOARD_XIAOMI_HAYDN
+    KBUILD_CPPFLAGS += -DHAYDN_CAM
 endif
 
 ifneq (,$(filter $(CONFIG_SPECTRA_CAMERA), y m))
