@@ -56,8 +56,13 @@
 #define PANEL_ORIENTATION_DEGREE_270	3	/* anticlockwise 270 degrees */
 #define GOODIX_LOCKDOWN_SIZE 8
 
+#ifndef CONFIG_BOARD_XIAOMI_RENOIR
 #define TS_DEFAULT_FIRMWARE			"goodix_gt9897t_fw_k9d.bin"
-#define TS_DEFAULT_CFG_BIN		"goodix_gt9897t_cfg_k9d.bin"
+#define TS_DEFAULT_CFG_BIN			"goodix_gt9897t_cfg_k9d.bin"
+#else
+#define TS_DEFAULT_FIRMWARE			"goodix_gt9897t_fw_k9.bin"
+#define TS_DEFAULT_CFG_BIN			"goodix_gt9897t_cfg_k9.bin"
+#endif
 
 #ifdef GOODIX_DEBUGFS_ENABLE
 #include <linux/debugfs.h>
