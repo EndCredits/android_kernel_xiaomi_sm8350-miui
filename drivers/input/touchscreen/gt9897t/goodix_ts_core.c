@@ -1190,6 +1190,7 @@ static int goodix_parse_dt(struct device *dev,
 		board_data->panel_max_y, board_data->panel_max_w,
 		board_data->panel_max_p);
 
+#ifndef CONFIG_BOARD_XIAOMI_RENOIR
 	r= of_property_read_u32(node, "goodix,config-array-size", &board_data->config_array_size);
 	if (r) {
 		ts_err("Unable to get array size\n");
@@ -1236,6 +1237,7 @@ static int goodix_parse_dt(struct device *dev,
 
 		config_info++;
 	}
+#endif
 
 	return 0;
 }
