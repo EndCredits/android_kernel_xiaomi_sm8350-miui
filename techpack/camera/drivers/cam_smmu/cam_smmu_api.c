@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2014-2021, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 #include <linux/module.h>
@@ -4286,6 +4287,7 @@ static int cam_smmu_component_bind(struct device *dev,
 	INIT_WORK(&iommu_cb_set.smmu_work, cam_smmu_page_fault_work);
 	mutex_init(&iommu_cb_set.payload_list_lock);
 	INIT_LIST_HEAD(&iommu_cb_set.payload_list);
+	iommu_cb_set.cb_dump_enable = true;
 	cam_smmu_create_debug_fs();
 
 	iommu_cb_set.force_cache_allocs =

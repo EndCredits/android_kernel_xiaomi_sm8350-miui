@@ -95,6 +95,23 @@ endif
 
 endif
 
+#add camera macro
+ifdef CONFIG_BOARD_XIAOMI_ZIJIN
+    KBUILD_CPPFLAGS += -DZIJIN_CAM
+endif
+
+ifdef CONFIG_BOARD_XIAOMI_TAOYAO
+    KBUILD_CPPFLAGS += -DTAOYAO_CAM
+endif
+
+ifdef CONFIG_BOARD_XIAOMI_RERDWOOD
+    KBUILD_CPPFLAGS += -DREDWOOD_CAM
+endif
+
+ifdef CONFIG_BOARD_XIAOMI_HAYDN
+    KBUILD_CPPFLAGS += -DHAYDN_CAM
+endif
+
 ifneq (,$(filter $(CONFIG_SPECTRA_CAMERA), y m))
 # Use USERINCLUDE when you must reference the UAPI directories only.
 USERINCLUDE     += \

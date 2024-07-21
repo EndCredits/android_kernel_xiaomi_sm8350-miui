@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2017-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2023-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 #include <linux/module.h>
+#include <linux/hwid.h>
 
 #include <dt-bindings/msm/msm-camera.h>
 
@@ -49,6 +50,22 @@ struct g_csiphy_data {
 
 static struct g_csiphy_data g_phy_data[MAX_CSIPHY] = {{0, 0}};
 static int active_csiphy_hw_cnt;
+
+static int csiphy_override_cnt  = 6;
+#if defined(CONFIG_BOARD_XIAOMI_STAR)
+static int csiphy_override[100] = {0x9B4,0xa,0xAB4,0xa,0xBB4,0xa};
+#else
+static int csiphy_override[100] = {0x9B4,0x8,0xAB4,0x8,0xBB4,0x8};
+#endif
+module_param_array(csiphy_override, int, &csiphy_override_cnt, 0644);
+
+#if defined(CONFIG_BOARD_XIAOMI_VENUS)
+static int csiphy_hack_rate_mb = 3500;
+#else
+static int csiphy_hack_rate_mb = 2000;
+#endif
+
+module_param(csiphy_hack_rate_mb, int, 0644);
 
 int32_t cam_csiphy_get_instance_offset(
 	struct csiphy_device *csiphy_dev,
@@ -433,7 +450,6 @@ int32_t cam_cmd_buf_parser(struct csiphy_device *csiphy_dev,
 	index = cam_csiphy_get_instance_offset(csiphy_dev, cfg_dev->dev_handle);
 	if (index < 0 || index  >= csiphy_dev->session_max_device_support) {
 		CAM_ERR(CAM_CSIPHY, "index in invalid: %d", index);
-		cam_mem_put_cpu_buf(cmd_desc->mem_handle);
 		return -EINVAL;
 	}
 
@@ -443,7 +459,6 @@ int32_t cam_cmd_buf_parser(struct csiphy_device *csiphy_dev,
 		CAM_ERR(CAM_CSIPHY,
 			"Wrong configuration lane_cnt: %u",
 			cam_cmd_csiphy_info->lane_cnt);
-		cam_mem_put_cpu_buf(cmd_desc->mem_handle);
 		return rc;
 	}
 
@@ -504,14 +519,11 @@ int32_t cam_cmd_buf_parser(struct csiphy_device *csiphy_dev,
 		csiphy_dev->csiphy_info[index].settle_time,
 		csiphy_dev->csiphy_info[index].data_rate);
 
-	cam_mem_put_cpu_buf(cmd_desc->mem_handle);
-	cam_mem_put_cpu_buf(cfg_dev->packet_handle);
 	return rc;
 
 reset_settings:
 	cam_csiphy_reset_phyconfig_param(csiphy_dev, index);
-	cam_mem_put_cpu_buf(cfg_dev->packet_handle);
-	cam_mem_put_cpu_buf(cmd_desc->mem_handle);
+
 	return rc;
 }
 
@@ -925,6 +937,22 @@ int32_t cam_csiphy_config_dev(struct csiphy_device *csiphy_dev,
 				rc);
 			return rc;
 		}
+
+		//csiphy_3phase only
+		if (get_hw_version_platform() == HARDWARE_PROJECT_J18 ||
+			get_hw_version_platform() == HARDWARE_PROJECT_K2 ||
+			get_hw_version_platform() == HARDWARE_PROJECT_K3S ||
+			get_hw_version_platform() == HARDWARE_PROJECT_K8 ||
+			get_hw_version_platform() == HARDWARE_PROJECT_K11) {
+			if ((csiphy_dev->csiphy_info[index].data_rate/1000000) > csiphy_hack_rate_mb)
+			{
+				for (i = 0; i < csiphy_override_cnt; i += 2)
+				{
+					cam_io_w_mb(csiphy_override[i+1],  csiphybase + csiphy_override[i]);
+					CAM_DBG(CAM_CSIPHY, "csiphy_cfg_override [0x%x, 0x%x]", csiphy_override[i], csiphy_override[i+1]);
+				}
+			}
+		}
 	}
 
 	cam_csiphy_cphy_irq_config(csiphy_dev);
@@ -978,7 +1006,8 @@ void cam_csiphy_shutdown(struct csiphy_device *csiphy_dev)
 		cam_csiphy_reset(csiphy_dev);
 		cam_soc_util_disable_platform_resource(soc_info, true, true);
 
-		cam_cpas_stop(csiphy_dev->cpas_handle);
+		//deleted by xiaomi
+		//cam_cpas_stop(csiphy_dev->cpas_handle);
 		csiphy_dev->csiphy_state = CAM_CSIPHY_ACQUIRE;
 	}
 
@@ -994,6 +1023,8 @@ void cam_csiphy_shutdown(struct csiphy_device *csiphy_dev)
 		}
 	}
 
+	// xiaomi: force stop cpas
+	cam_cpas_stop(csiphy_dev->cpas_handle);
 	csiphy_dev->ref_count = 0;
 	csiphy_dev->acquire_count = 0;
 	csiphy_dev->start_dev_count = 0;

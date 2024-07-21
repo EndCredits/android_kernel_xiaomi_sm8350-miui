@@ -9,6 +9,10 @@
 #include "cam_req_mgr_workq.h"
 #include "cam_common_util.h"
 
+
+static int disable_optmz;
+module_param(disable_optmz, int, 0644);
+
 static int32_t cam_cci_convert_type_to_num_bytes(
 	enum camera_sensor_i2c_type type)
 {
@@ -525,22 +529,27 @@ static int32_t cam_cci_calc_cmd_len(struct cci_device *cci_dev,
 		len = data_len + addr_len;
 		pack_max_len = size < (cci_dev->payload_size-len) ?
 			size : (cci_dev->payload_size-len);
-		for (i = 0; i < pack_max_len;) {
-			if (cmd->delay || ((cmd - i2c_cmd) >= (cmd_size - 1)))
-				break;
-			if (cmd->reg_addr + 1 ==
-				(cmd+1)->reg_addr) {
-				len += data_len;
-				if (len > cci_dev->payload_size) {
-					len = len - data_len;
+		/* xiaomi add a flag to disable this optimization*/
+		if ((!c_ctrl->cci_info->disable_optmz) && (!disable_optmz))
+		{
+			CAM_DBG(CAM_CCI, "enable writing optimization for 0x%02X", c_ctrl->cci_info->sid<<1);
+			for (i = 0; i < pack_max_len;) {
+				if (cmd->delay || ((cmd - i2c_cmd) >= (cmd_size - 1)))
+					break;
+				if (cmd->reg_addr + 1 ==
+					(cmd+1)->reg_addr) {
+					len += data_len;
+					if (len > cci_dev->payload_size) {
+						len = len - data_len;
+						break;
+					}
+					(*pack)++;
+				} else {
 					break;
 				}
-				(*pack)++;
-			} else {
-				break;
+				i += data_len;
+				cmd++;
 			}
-			i += data_len;
-			cmd++;
 		}
 	}
 
@@ -1887,12 +1896,20 @@ int32_t cam_cci_core_cfg(struct v4l2_subdev *sd,
 		 * CCI version 1.2 does not support burst read
 		 * due to the absence of the read threshold register
 		 */
+                mutex_lock(&cci_dev->init_mutex);
 		if (cci_dev->hw_version == CCI_VERSION_1_2_9) {
 			CAM_DBG(CAM_CCI, "cci-v1.2 no burst read");
 			rc = cam_cci_read_bytes_v_1_2(sd, cci_ctrl);
 		} else {
 			rc = cam_cci_read_bytes(sd, cci_ctrl);
 		}
+		if (rc < 0) {
+			CAM_ERR(CAM_CCI, "cam cci err %d , read, slav 0x%x on dev/master %d/%d",
+				rc, cci_ctrl->cci_info->sid << 1,
+				cci_ctrl->cci_info->cci_device,
+				cci_ctrl->cci_info->cci_i2c_master);
+		}
+                mutex_unlock(&cci_dev->init_mutex);
 		break;
 	case MSM_CCI_I2C_WRITE:
 	case MSM_CCI_I2C_WRITE_SEQ:
@@ -1900,7 +1917,16 @@ int32_t cam_cci_core_cfg(struct v4l2_subdev *sd,
 	case MSM_CCI_I2C_WRITE_SYNC:
 	case MSM_CCI_I2C_WRITE_ASYNC:
 	case MSM_CCI_I2C_WRITE_SYNC_BLOCK:
+                mutex_lock(&cci_dev->init_mutex);
 		rc = cam_cci_write(sd, cci_ctrl);
+		if (rc < 0) {
+			CAM_ERR(CAM_CCI, "cam cci err %d , write type %d , slav 0x%x on dev/master %d/%d",
+				rc, cci_ctrl->cmd,
+				cci_ctrl->cci_info->sid << 1,
+				cci_ctrl->cci_info->cci_device,
+				cci_ctrl->cci_info->cci_i2c_master);
+                }
+                mutex_unlock(&cci_dev->init_mutex);
 		break;
 	case MSM_CCI_GPIO_WRITE:
 		break;
