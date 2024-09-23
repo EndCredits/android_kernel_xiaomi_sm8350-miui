@@ -588,6 +588,8 @@
 	mi,hbm-bl-min-level = <1>;
 	mi,hbm-bl-max-level = <2047>;
 
+	mi,panel-hbm-backlight-threshold = <4095>;
+
 	mi,esd-err-irq-gpio = <&tlmm 75 0x2001>;
 
 	mi,panel-on-dimming-delay = <120>;
