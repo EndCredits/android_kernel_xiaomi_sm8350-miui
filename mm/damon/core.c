@@ -13,6 +13,7 @@
 #include <linux/mm.h>
 #include <linux/slab.h>
 #include <linux/string.h>
+#include <linux/sched/task.h>
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/damon.h>

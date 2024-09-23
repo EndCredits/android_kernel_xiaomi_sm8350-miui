@@ -15,6 +15,7 @@
 #include <linux/pagewalk.h>
 #include <linux/sched/mm.h>
 #include <linux/pid.h>
+#include <linux/sched/task.h>
 
 #include "ops-common.h"
 
