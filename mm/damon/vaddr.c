@@ -14,6 +14,7 @@
 #include <linux/page_idle.h>
 #include <linux/pagewalk.h>
 #include <linux/sched/mm.h>
+#include <linux/pid.h>
 
 #include "ops-common.h"
 
@@ -624,7 +625,7 @@ static unsigned long damos_madvise(struct damon_target *target,
 	mm = damon_get_mm(target);
 	if (!mm)
 		return 0;
-	target_task =  mm->owner;
+	target_task = pid_task(target->pid, PIDTYPE_PID);
 
 	applied = do_madvise(target_task, mm, start, len, behavior) ? 0 : len;
 	mmput(mm);
