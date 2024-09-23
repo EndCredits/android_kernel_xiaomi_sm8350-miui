@@ -300,7 +300,7 @@
 			     <0x0 0x13 0x2 IRQ_TYPE_EDGE_BOTH>;
 		interrupt-names = "kpdpwr", "resin", "kpdpwr-bark",
 				"kpdpwr-resin-bark";
-		qcom,pon-dbc-delay = <15625>;
+		qcom,pon-dbc-delay = <31250>;
 		qcom,kpdpwr-sw-debounce;
 		qcom,pon_1 {
 			qcom,pon-type = <PON_POWER_ON_TYPE_KPDPWR>;
