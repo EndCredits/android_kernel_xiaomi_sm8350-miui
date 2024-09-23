@@ -370,6 +370,8 @@
 
 	mi,max-brightness-clone = <8191>;
 
+	mi,lhbm-fod-touch-mode-ctl-by-sf;
+
 	qcom,mdss-dsi-display-timings {
 		timing@0{
 			mi,mdss-dsi-dimmingon-command = [15 01 00 00 00 00 02 53 28];

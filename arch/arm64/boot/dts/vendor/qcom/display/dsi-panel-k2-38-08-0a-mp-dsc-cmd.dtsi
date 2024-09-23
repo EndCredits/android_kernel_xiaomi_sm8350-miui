@@ -609,6 +609,7 @@
 	mi,fod-low-brightness-clone-threshold = <40>;
 	mi,fod-low-brightness-lux-threshold = <3>;
 	mi,mdss-dsi-panel-hbm-brightness = <1>;
+	mi,lhbm-fod-touch-mode-ctl-by-sf;
 
 	qcom,mdss-dsi-display-timings {
 		timing@0{
