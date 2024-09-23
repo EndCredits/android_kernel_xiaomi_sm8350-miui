@@ -22,6 +22,9 @@
 #include <linux/pm_qos.h>
 #include <linux/cpufreq.h>
 #include <linux/sched/sysctl.h>
+#include <linux/irqreturn.h>
+#include <linux/interrupt.h>
+#include <linux/cpu.h>
 
 #include <linux/haven/hcall.h>
 #include <linux/haven/hh_errno.h>
